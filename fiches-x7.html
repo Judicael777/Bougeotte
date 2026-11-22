@@ -60,6 +60,13 @@ th{background:var(--soft)}
 .home{text-align:center;padding:40px 20px}
 .links td:first-child{white-space:nowrap}
 .links code{font-size:12.5px;word-break:break-all}
+.teams{display:grid;gap:10px;margin:18px auto 0;max-width:460px;text-align:left}
+.tbtn{display:block;text-decoration:none;border:1px solid var(--line);border-radius:12px;padding:12px 16px;background:var(--card);color:var(--ink)}
+.tbtn b{color:var(--brand);font-size:17px}.tbtn span{display:block;color:var(--muted);font-size:14px}
+.roles{display:grid;gap:8px;margin:8px 0}
+.rbtn{display:block;text-decoration:none;border:1px solid var(--brand);border-radius:10px;padding:9px 14px;color:var(--brand);font-weight:600}
+.rbtn span{font-weight:400;color:var(--muted);font-size:14px}
+.back{display:inline-block;margin-top:22px;font-size:14px}
 .sec{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--brand);font-weight:700}
 @media (max-width:560px){ .card{padding:20px 16px} .head h1{font-size:21px} }
 @media print{ body{background:#fff} .top,.row-btns{display:none} .card{border:0;box-shadow:none;padding:0} }
@@ -75,14 +82,22 @@ const SITE = "https://judicael777.github.io/Bougeotte/";
 const ROLES = [
 /* ---------------- RÈGLES ---------------- */
 {id:"regles", group:"Pour tous", title:"Règles du jeu", tag:"À projeter", html:`
-<p class="lead">Aujourd'hui, la CNIL contrôle Bougeotte deux fois, sur deux affaires différentes. Une manche par affaire, avec des acteurs différents. Ceux qui ne jouent pas observent avec une grille. On termine par le débrief et le corrigé.</p>
+<p class="lead">Aujourd'hui, la CNIL contrôle Bougeotte deux fois, sur deux affaires différentes. Pour chaque affaire, une équipe joue la CNIL et une équipe joue Bougeotte. Les autres observent avec une grille. Chaque contrôle est débriefé et corrigé tout de suite. Pas de classement : on juge Bougeotte, jamais les joueurs.</p>
+<h2>Qui joue</h2>
+<table><tr><th>Équipe</th><th>Rôle</th></tr>
+<tr><td>Équipe 1</td><td>La CNIL, cas A</td></tr>
+<tr><td>Équipe 2</td><td>Bougeotte, cas A</td></tr>
+<tr><td>Équipe 3</td><td>La CNIL, cas B</td></tr>
+<tr><td>Équipe 4</td><td>Bougeotte, cas B</td></tr>
+<tr><td>Équipe 5</td><td>Observe les deux contrôles</td></tr></table>
+<p>Quand votre équipe ne joue pas, elle observe.</p>
 <h2>Déroulé</h2>
 <table><tr><th>Étape</th><th>Durée</th><th>Qui</th></tr>
 <tr><td>Préparation</td><td>10 min</td><td>Chacun lit sa fiche. Les contrôleurs lisent l'ordre de mission de leur cas.</td></tr>
-<tr><td>Manche 1 : cas A, « La plainte de Léa »</td><td>30 min</td><td>4 contrôleurs A face à 4 joueurs Bougeotte A. Les 12 autres observent.</td></tr>
-<tr><td>Débrief de la manche 1</td><td>10 min</td><td>Les observateurs disent ce qui a été trouvé et raté. Le formateur complète.</td></tr>
-<tr><td>Manche 2 : cas B, « L'assistant trop bavard »</td><td>30 min</td><td>4 contrôleurs B face à 4 joueurs Bougeotte B. Les 12 autres observent.</td></tr>
-<tr><td>Débrief de la manche 2 et corrigé</td><td>15 min</td><td>Les observateurs, puis le formateur : ce que Bougeotte cachait dans les deux affaires.</td></tr></table>
+<tr><td>Premier contrôle : cas A, «&nbsp;La plainte de Léa&nbsp;»</td><td>25&nbsp;min</td><td>Équipe 1 face à l'équipe 2. Les autres observent.</td></tr>
+<tr><td>Débrief et corrigé du cas A</td><td>10 min</td><td>Les observateurs, puis Bougeotte (ce qu'elle cachait), puis le corrigé du formateur.</td></tr>
+<tr><td>Second contrôle : cas B, «&nbsp;L'assistant trop bavard&nbsp;»</td><td>25&nbsp;min</td><td>Équipe 3 face à l'équipe 4. Les autres observent.</td></tr>
+<tr><td>Débrief et corrigé du cas B</td><td>10 min</td><td>Même déroulé : observateurs, Bougeotte, corrigé.</td></tr></table>
 <h2>Si vous êtes Bougeotte</h2>
 <ul><li>Vous ne mentez jamais. Vous pouvez être vagues, prendre votre temps, renvoyer vers un collègue.</li>
 <li>Vous ne remettez une pièce de la data room que si elle est demandée de façon précise. « Tous vos documents » n'est pas précis. « Votre registre des violations » l'est.</li>
@@ -94,8 +109,9 @@ const ROLES = [
 <li>Distinguez ce que vous avez vu (une pièce, un écran) de ce qu'on vous a dit (une déclaration).</li>
 <li>Vous constatez, vous ne jugez pas. La qualification vient à la fin.</li></ul>
 <h2>Si vous observez</h2>
-<ul><li>Ouvrez la grille de votre thème (deux observateurs par thème). Cochez ce que les contrôleurs trouvent ou ratent, et notez comment.</li>
-<li>Vous ne parlez pas pendant la manche.</li></ul>`},
+<ul><li>Votre équipe se partage les six grilles : chacun en ouvre une ou deux. Cochez ce que les contrôleurs trouvent ou ratent, et notez comment.</li>
+<li>Vous ne parlez pas pendant le contrôle.</li>
+<li>Au débrief, vous parlez en premier : un réflexe réussi, puis ce qui a manqué.</li></ul>`},
 
 /* ---------------- MISSIONS ---------------- */
 {id:"mission-a", group:"Contrôleurs", title:"Ordre de mission : cas A, « La plainte de Léa »", tag:"Contrôleurs A", html:`
@@ -104,7 +120,7 @@ const ROLES = [
 <h2>Pourquoi ce contrôle</h2>
 <ol><li>Une plainte de Mme Léa Fournier, qui utilise l'application via son employeur. Sa demande d'accès du 12 août est restée sans réponse. Son manager lui a parlé de son « indice de stress » en entretien annuel.</li>
 <li>Un signalement anonyme : des exports de données de salariés auraient été accessibles publiquement sur Internet en septembre.</li>
-<li>Les constats du contrôle en ligne de ce matin sur la boutique.</li></ol>
+<li>Les constats du contrôle en ligne de la boutique.</li></ol>
 <h2>Ce que vous devez vérifier</h2>
 <ul><li>Ce que reçoivent les employeurs clients, et sur quelle base.</li>
 <li>La gestion des demandes de droits.</li>
@@ -126,7 +142,7 @@ const ROLES = [
 <div class="quote">« Bien sûr ! Voici les dernières commandes enregistrées : BG-551203 : Karim B., 12 rue Garibaldi, 69003 Lyon, 06 12 34 56 78 (Balance connectée, Gourde) »</div></li>
 <li><b>12 plaintes de particuliers</b> qui reçoivent des emails « Léa, votre coach vous attend » sans s'être jamais inscrits chez Bougeotte.</li>
 <li><b>Un article de presse</b> (fictif) : « Bougeotte prépare une IA qui prédit vos blessures à partir de vos données de santé ».</li>
-<li>Les constats du contrôle en ligne de ce matin sur la boutique.</li></ol>
+<li>Les constats du contrôle en ligne de la boutique.</li></ol>
 <h2>Ce que vous devez vérifier</h2>
 <ul><li>L'assistant : qui le fournit, où vont les messages, que peut-il consulter, sait-on que c'est une IA.</li>
 <li>La sécurité de l'assistant, et la suite donnée au signalement.</li>
@@ -147,10 +163,10 @@ const ROLES = [
 <h2>Votre rôle</h2>
 <ul><li>Ouvrez le contrôle : présentez l'équipe, l'objet de la mission (votre ordre de mission A ou B) et le déroulé.</li>
 <li>Rappelez le cadre : les contrôleurs peuvent demander tout document utile et entendre toute personne.</li>
-<li>Gérez le temps : 30 minutes. Décidez quelles pièces demander, dans quel ordre.</li>
+<li>Gérez le temps : 25 minutes. Décidez quelles pièces demander, dans quel ordre.</li>
 <li>À la fin, faites relire au rédacteur la liste des pièces remises et les déclarations importantes.</li></ul>
 <h2>Votre conseil</h2>
-<p>Partez des faits que vous connaissez (plainte, signalement, constats du matin), puis élargissez. Une question ouverte d'abord, une demande de pièce ensuite.</p>`},
+<p>Partez des faits que vous connaissez (plainte, signalement, constats sur la boutique), puis élargissez. Une question ouverte d'abord, une demande de pièce ensuite.</p>`},
 {id:"juriste", group:"Contrôleurs", title:"Juriste", tag:"Contrôleur", html:`
 <p class="lead">Vous cherchez les règles qui ne sont pas respectées.</p>
 <h2>Votre terrain</h2>
@@ -267,7 +283,7 @@ const ROLES = [
 <h2>Votre phrase fétiche</h2><p>« Les clients adorent Julie. »</p>
 <p class="pieces">Pièces que vous connaissez bien : P04, P10, P17, P18.</p>`},
 {id:"avocat", group:"Bougeotte, cas B", title:"Me Aubert, avocat de Bougeotte", tag:"Secret · cas B · facultatif", html:`
-<p class="lead">Vous êtes l'avocat de Bougeotte, appelé en urgence ce matin. Vous ne connaissez pas le dossier technique.</p>
+<p class="lead">Vous êtes l'avocat de Bougeotte, appelé en urgence à l'arrivée de la CNIL. Vous ne connaissez pas le dossier technique.</p>
 <h2>Votre objectif</h2><p>Protéger votre client sans tomber dans l'entrave.</p>
 <h2>Ce que vous pouvez faire</h2>
 <ul><li>Demander que les questions soient précises, et que les réponses de vos clients soient fidèlement notées au PV.</li>
@@ -275,10 +291,9 @@ const ROLES = [
 <li>Faire préciser l'objet du contrôle : « Cette question entre-t-elle dans votre ordre de mission ? »</li></ul>
 <h2>Ce que vous ne pouvez pas faire</h2>
 <ul><li>Interdire à vos clients de répondre, ou refuser une pièce clairement demandée. Ce serait de l'entrave.</li></ul>
-<h2>Votre secret</h2><p>Vous avez conseillé ce matin de « ne remettre que le strict minimum ». Si un contrôleur vous demande si vous avez donné cette consigne, vous répondez prudemment.</p>
+<h2>Votre secret</h2><p>Vous avez conseillé, juste avant le contrôle, de « ne remettre que le strict minimum ». Si un contrôleur vous demande si vous avez donné cette consigne, vous répondez prudemment.</p>
 <h2>Votre phrase fétiche</h2><p>« Je note que cette question sort de l'objet du contrôle. »</p>`},
 
-/* ---------------- COMMISSION ---------------- */
 /* ---------------- OBSERVATEURS ---------------- */
 {id:"obs-securite", group:"Observateurs", title:"Grille : sécurité", tag:"Observateur", grid:[
  ["A","Compte d'administration partagé, sans double authentification (P12)"],["A","Mot de passe transmis en clair dans un ticket (P12)"],
@@ -301,7 +316,7 @@ const ROLES = [
  ["B","Comptes supprimés réutilisés pour entraîner l'IA (P07)"],["B","Conversations de l'assistant gardées sans limite"],
  ["B","Plaintes « d'où vient mon adresse ? » restées sans réponse"]]},
 {id:"obs-marketing", group:"Observateurs", title:"Grille : prospection et interfaces", tag:"Observateur", grid:[
- ["A","Case « offres partenaires » précochée (P05)"],["A","Bandeau cookies du site (P18) relié aux constats du matin"],
+ ["A","Case « offres partenaires » précochée (P05)"],["A","Bandeau cookies du site (P18) relié aux constats sur la boutique"],
  ["B","Fichier de 50 000 adresses acheté (P17)"],["B","Consentement donné à un autre que Bougeotte"],
  ["B","Campagne Black Friday prévue le 27 novembre avec le même fichier"],["B","Assistant présenté comme « Julie, votre conseillère » (pas de mention IA)"]]},
 {id:"obs-gouvernance", group:"Observateurs", title:"Grille : gouvernance et documentation", tag:"Observateur", grid:[
@@ -315,7 +330,7 @@ const ROLES = [
 <p class="fict">Document fictif, exercice pédagogique. Vos saisies restent dans ce navigateur. Copiez le PV à la fin et envoyez-le au formateur.</p>
 <div class="form" data-save="pv">
 <label for="pv_cas">Affaire</label><select id="pv_cas"><option>Cas A : la plainte de Léa</option><option>Cas B : l'assistant trop bavard</option></select>
-<label for="pv_heures">Date et heures (début, fin)</label><input id="pv_heures" placeholder="23/11/2026, 14 h 10 à 14 h 40">
+<label for="pv_heures">Date et heures (début, fin)</label><input id="pv_heures" placeholder="Date, heure de début, heure de fin">
 <label for="pv_ctrl">Contrôleurs (noms et rôles)</label><input id="pv_ctrl">
 <label for="pv_pers">Personnes entendues (nom, fonction)</label><textarea id="pv_pers" rows="3"></textarea>
 <label for="pv_pieces">Pièces remises (numéro, intitulé, heure)</label><textarea id="pv_pieces" rows="5"></textarea>
@@ -326,6 +341,44 @@ const ROLES = [
 </div>`}
 ];
 
+const DATAROOM = SITE + "dataroom-x7.html";
+const TEAMS = {
+ "equipe-1": {n:1, title:"La CNIL, cas A", badge:"Contrôleurs", cas:"A", kind:"cnil", observe:"le second contrôle (cas B)"},
+ "equipe-2": {n:2, title:"Bougeotte, cas A", badge:"Secret", cas:"A", kind:"bgt", roles:["camille","hugo","ines","theo"], opt:"theo", observe:"le second contrôle (cas B)"},
+ "equipe-3": {n:3, title:"La CNIL, cas B", badge:"Contrôleurs", cas:"B", kind:"cnil", observe:"le premier contrôle (cas A)"},
+ "equipe-4": {n:4, title:"Bougeotte, cas B", badge:"Secret", cas:"B", kind:"bgt", roles:["nora","yanis","sarah","avocat"], opt:"avocat", observe:"le premier contrôle (cas A)"},
+ "equipe-5": {n:5, title:"Observateurs", badge:"Observateurs", kind:"obs"}
+};
+const GRIDS = ["obs-securite","obs-sante","obs-transferts","obs-droits","obs-marketing","obs-gouvernance"];
+const rbtn = (id, extra) => `<a class="rbtn" href="#${id}">${esc(byId[id].title)}${extra ? ` <span>${extra}</span>` : ""}</a>`;
+function gridsHtml(){ return `<div class="roles">${GRIDS.map(g => rbtn(g)).join("")}</div>`; }
+function renderTeam(id){
+  const t = TEAMS[id];
+  let h = `<div class="grp">Équipe ${t.n}</div><div class="head"><h1>${esc(t.title)}</h1><span class="badge">${esc(t.badge)}</span></div>`;
+  if (t.kind === "cnil"){
+    h += `<p class="lead">Vous êtes la délégation de la CNIL pour le cas ${t.cas}.</p>
+    <h2>1. Ensemble : lisez votre ordre de mission</h2><div class="roles">${rbtn("mission-" + t.cas.toLowerCase())}</div>
+    <h2>2. Chacun choisit un rôle différent</h2><div class="roles">${rbtn("chef")}${rbtn("juriste")}${rbtn("auditeur")}${rbtn("redacteur", "ouvre aussi le procès-verbal")}</div>
+    <p class="tip">Vous êtes 3 ? Le chef de mission prend aussi le rôle de juriste.</p>
+    <h2>3. Le rédacteur ouvre le procès-verbal</h2><div class="roles">${rbtn("pv")}</div>
+    <p>Vous n'avez pas accès à la data room : vous demandez chaque pièce à l'oral.</p>`;
+  } else if (t.kind === "bgt"){
+    h += `<p class="lead">Vous êtes l'équipe de Bougeotte contrôlée dans le cas ${t.cas}. Vos fiches sont secrètes : ne les montrez pas.</p>
+    <h2>1. Chacun choisit un personnage différent</h2><div class="roles">${t.roles.map(r => rbtn(r, r === t.opt ? "si vous êtes 4" : "")).join("")}</div>
+    <h2>2. Ouvrez la data room</h2>
+    <div class="roles"><a class="rbtn" href="${DATAROOM}" target="_blank" rel="noopener">Data room Bougeotte <span>18 pièces et bordereau</span></a></div>
+    <ul><li>Sur un seul ordinateur de l'équipe, tourné vers vous. Ne la montrez jamais à la CNIL.</li>
+    <li>Vous ne remettez une pièce que si elle est demandée précisément. Cliquez alors sur «&nbsp;Marquer comme communiquée&nbsp;».</li>
+    <li>Vous ne mentez jamais. Refuser une pièce clairement demandée, c'est de l'entrave.</li></ul>`;
+  } else {
+    h += `<p class="lead">Vous observez les deux contrôles, sans parler. Au débrief, vous parlez en premier : un réflexe réussi, puis ce qui a manqué.</p>
+    <h2>Partagez-vous les six grilles : chacun en ouvre une ou deux</h2>${gridsHtml()}`;
+  }
+  if (t.observe) h += `<h2>Quand vous ne jouez pas</h2><p>Pendant ${t.observe}, vous observez. Partagez-vous les grilles :</p>${gridsHtml()}`;
+  h += `<h2>Pour tous</h2><div class="roles">${rbtn("regles")}</div>`;
+  view.innerHTML = h;
+}
+
 const GROUP_ORDER = ["Pour tous","Contrôleurs","Bougeotte, cas A","Bougeotte, cas B","Observateurs"];
 
 const view = document.getElementById("view");
@@ -335,7 +388,7 @@ function store(k, v){ try { if (v === undefined) return JSON.parse(localStorage.
 const base = location.origin + location.pathname;
 
 function gridHtml(r){
-  return `<p class="lead">Pendant chaque manche, cochez ce que les contrôleurs trouvent. « Effleuré » : ils s'en sont approchés sans aller jusqu'à la preuve. Notez comment ils s'y sont pris, ou ce qui leur a manqué.</p>
+  return `<p class="lead">Pendant chaque contrôle, cochez ce que les contrôleurs trouvent. « Effleuré » : ils s'en sont approchés sans aller jusqu'à la preuve. Notez comment ils s'y sont pris, ou ce qui leur a manqué.</p>
     <div class="form" data-save="${r.id}">${r.grid.map((g, i) => `
       <div class="gitem"><div class="q"><span class="cas">Cas ${g[0]}</span><span>${g[1]}</span></div>
         <div class="choices" role="radiogroup" aria-label="${esc(g[1])}">
@@ -361,7 +414,6 @@ function textOf(r){
       out += "\n" + l.textContent + " : " + (el.tagName === "SELECT" ? el.options[el.selectedIndex].text : (el.value || "-"));
     });
     box.querySelectorAll("input[type=checkbox]").forEach(c => { if (c.checked) out += "\n[x] " + c.parentElement.textContent.trim(); });
-    const co = document.getElementById("calcOut"); if (co) out += "\n\n" + co.textContent + "\n";
   }
   return out;
 }
@@ -382,50 +434,33 @@ function wireForm(r){
   document.getElementById("copy").onclick = async () => { try { await navigator.clipboard.writeText(textOf(r)); document.getElementById("m").textContent = "Copié. Collez-le dans le fil de la classe."; } catch(e){ document.getElementById("m").textContent = "Copie refusée : sélectionnez le texte à la main."; } };
   document.getElementById("clear").onclick = (e) => { const b = e.target; if (!b.dataset.ok){ b.dataset.ok = 1; b.textContent = "Cliquer encore pour tout effacer"; return; } store(key, {}); render(); };
 }
-function setupCalc(){
-  const out = document.getElementById("calcOut"); if (!out) return;
-  const run = () => {
-    let score = 0;
-    [1,2,3].forEach(i => { score += (+document.getElementById("m"+i+"_g").value) * (+document.getElementById("m"+i+"_p").value); });
-    ["a1","a2","a3","a4","a5","a6"].forEach(id => { const c = document.getElementById(id); if (c.checked) score += +c.value; });
-    let s;
-    if (score <= 9) s = "Mise en demeure, sans amende.";
-    else if (score <= 14) s = "Amende de 50 000 à 150 000 €.";
-    else if (score <= 20) s = "Amende de 150 000 à 400 000 €, décision publique.";
-    else s = "Amende de 400 000 à 800 000 €, décision publique, injonction sous astreinte.";
-    out.innerHTML = "<b>Score : " + score + " points.</b> Fourchette indicative : " + s;
-  };
-  document.querySelectorAll(".calc").forEach(el => el.addEventListener("change", run));
-  run();
-}
 function renderRole(r){
   view.innerHTML = `<div class="grp">${esc(r.group)}</div>
     <div class="head"><h1>${esc(r.title)}</h1><span class="badge">${esc(r.tag)}</span></div>
     ${r.grid ? gridHtml(r) : r.html}`;
   wireForm(r);
-  if (r.id === "commission") setupCalc();
+  view.insertAdjacentHTML("beforeend", `<a class="back" href="javascript:history.back()">Retour</a>`);
 }
 function renderPlan(){
   const groups = [...new Set(ROLES.map(r => r.group))];
   view.innerHTML = `<div class="grp">Formateur</div><div class="head"><h1>Plan de distribution des liens</h1><span class="badge">Ne pas projeter</span></div>
     <p>Donnez à chacun uniquement son lien. Les fiches Bougeotte sont secrètes : ni les contrôleurs ni l'autre cas ne doivent les voir.</p>
-    <h2>Distribution pour 20 personnes</h2>
-    <p>16 joueurs (8 par manche) et 4 observateurs permanents.</p>
-    <table><tr><th>Groupe</th><th>Nb</th><th>Liens</th></tr>
-      <tr><td>Contrôleurs cas A</td><td>4</td><td>mission-a, puis chef, juriste, auditeur, redacteur (un par personne), pv pour le rédacteur</td></tr>
-      <tr><td>Bougeotte cas A</td><td>4</td><td>camille, hugo, ines, theo + la data room</td></tr>
-      <tr><td>Contrôleurs cas B</td><td>4</td><td>mission-b, puis chef, juriste, auditeur, redacteur, pv</td></tr>
-      <tr><td>Bougeotte cas B</td><td>4</td><td>nora, yanis, sarah, avocat + la data room</td></tr>
-      <tr><td>Observateurs</td><td>12 par manche</td><td>Les 4 qui restent observent les deux manches. Pendant la manche 1, les 8 du cas B observent aussi, et inversement. Deux observateurs par thème.</td></tr></table>
+    <h2>Rien à distribuer</h2>
+    <p>Chacun scanne le QR code de la slide « Ouvrez votre fiche », touche le bouton de son équipe, puis choisit un rôle différent de ses coéquipiers. La data room n'apparaît que sur les pages des équipes 2 et 4.</p>
+    <table><tr><th>Équipe</th><th>Rôle</th><th>Page d'équipe</th></tr>
+      ${Object.entries(TEAMS).map(([id, t]) => `<tr><td>Équipe ${t.n}</td><td>${esc(t.title)}</td><td><a href="#${id}">#${id}</a></td></tr>`).join("")}</table>
+    <p>Équipe CNIL de 3 personnes : le chef de mission prend aussi le rôle de juriste. Équipe Bougeotte de 3 : Théo (cas A) ou l'avocat (cas B) reste vide.</p>
     ${groups.map(g => `<h2>${esc(g)}</h2><table class="links">${ROLES.filter(r => r.group === g).map(r => `<tr><td><a href="#${r.id}">${esc(r.title)}</a></td><td><code>${esc(base + "#" + r.id)}</code></td></tr>`).join("")}</table>`).join("")}`;
 }
 function renderHome(){
-  view.innerHTML = `<div class="home"><div class="sec">Simulation de contrôle</div><h1 style="margin:.3em 0">Ouvrez le lien de votre rôle</h1>
-    <p>Votre formateur vous donne un lien personnel. Il mène directement à votre fiche.</p></div>`;
+  view.innerHTML = `<div class="home"><div class="sec">Simulation de contrôle</div><h1 style="margin:.3em 0">Touchez le bouton de votre équipe</h1>
+    <p>Puis, dans votre équipe, chacun choisit un rôle différent. N'ouvrez que la page de votre équipe.</p>
+    <div class="teams">${Object.entries(TEAMS).map(([id, t]) => `<a class="tbtn" href="#${id}"><b>Équipe ${t.n}</b><span>${esc(t.title)}</span></a>`).join("")}</div></div>`;
 }
 function render(){
   const h = (location.hash || "").slice(1);
   if (byId[h]) renderRole(byId[h]);
+  else if (TEAMS[h]) renderTeam(h);
   else if (h === "plan-formateur") renderPlan();
   else renderHome();
   window.scrollTo(0, 0);
