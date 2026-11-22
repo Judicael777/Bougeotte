@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data room Bougeotte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Salle de données virtuelle : index à gauche, pièce au centre sur une feuille blanche, tampon FICTIF */
+  --bg:#eef1f5; --paper:#ffffff; --ink:#18212c; --muted:#5a6676; --line:#d9dfe7;
+  --accent:#1d4e89; --accent-soft:#e3ecf7; --stamp:#b42318; --ok:#1e7a46; --hl:#fff4c2;
+  --f-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-doc:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e131a; --paper:#161d26; --ink:#e4e9ef; --muted:#9aa6b5; --line:#2a3542;
+    --accent:#86b4ea; --accent-soft:#1c2a3b; --stamp:#f08a7e; --ok:#6fd19a; --hl:#3b3416;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --paper:#161d26; --ink:#e4e9ef; --muted:#9aa6b5; --line:#2a3542;
+  --accent:#86b4ea; --accent-soft:#1c2a3b; --stamp:#f08a7e; --ok:#6fd19a; --hl:#3b3416;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.banner{background:var(--stamp);color:#fff;font-size:12.5px;padding:6px 16px;text-align:center;letter-spacing:.02em}
+:root[data-theme="dark"] .banner{color:#1a0d0b}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .banner{color:#1a0d0b}}
+.top{display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--paper)}
+.logo{font-weight:700;font-size:19px;letter-spacing:-.01em}
+.logo span{color:var(--accent)}
+.top .meta{color:var(--muted);font-size:13px}
+.top .spacer{flex:1}
+.btn{font:inherit;font-size:13.5px;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:7px 12px;border-radius:6px;cursor:pointer}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.btn.primary:hover{color:var(--paper);filter:brightness(1.08)}
+.layout{display:grid;grid-template-columns:320px 1fr;min-height:calc(100% - 90px)}
+nav{border-right:1px solid var(--line);padding:16px 12px 40px;background:var(--paper);overflow:auto}
+.folder{margin:14px 6px 6px;font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.item{display:grid;grid-template-columns:44px 1fr auto;gap:6px;align-items:baseline;width:100%;text-align:left;font:inherit;font-size:14px;color:var(--ink);background:none;border:0;border-radius:6px;padding:7px 8px;cursor:pointer}
+.item:hover{background:var(--accent-soft)}
+.item[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.item .ref{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.item .sent{font-size:11px;color:var(--ok);font-weight:600}
+main{padding:28px 24px 80px;overflow:auto}
+.docbar{max-width:860px;margin:0 auto 12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.docbar .info{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.sheet{position:relative;max-width:860px;margin:0 auto;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:48px 56px 56px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(20,30,45,.06)}
+.stamp{position:absolute;top:22px;right:24px;border:2px solid var(--stamp);color:var(--stamp);font-family:var(--f-mono);font-weight:500;font-size:12px;letter-spacing:.12em;padding:3px 8px;transform:rotate(4deg);opacity:.85}
+.sheet h1{font-family:var(--f-doc);font-weight:600;font-size:26px;line-height:1.2;margin:0 0 6px;text-wrap:balance;max-width:85%}
+.sheet .sub{color:var(--muted);font-size:13.5px;margin:0 0 26px}
+.sheet h2{font-family:var(--f-ui);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:28px 0 8px}
+.sheet p,.sheet li{font-family:var(--f-doc);font-size:16px;line-height:1.6;max-width:68ch}
+.sheet ul,.sheet ol{padding-left:22px}
+.tbl{overflow-x:auto;margin:10px 0 6px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft);font-weight:600}
+.mail{border:1px solid var(--line);border-radius:6px;margin:14px 0;overflow:hidden}
+.mail .h{background:var(--accent-soft);padding:9px 14px;font-size:13px;font-family:var(--f-mono);line-height:1.6}
+.mail .b{padding:12px 16px}
+.mail .b p{margin:0 0 10px}
+.code{font-family:var(--f-mono);font-size:13px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:12px 14px;overflow-x:auto;white-space:pre;line-height:1.55}
+.note{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:30px;padding-top:12px}
+.form{border:1px solid var(--line);border-radius:10px;padding:20px;max-width:420px;margin:12px 0;font-family:var(--f-ui)}
+.form .f{margin-bottom:12px}
+.form label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+.form .in{border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:13.5px;color:var(--muted)}
+.form .chk{display:flex;gap:8px;font-size:13.5px;margin:8px 0}
+.form .box{width:16px;height:16px;border:1.5px solid var(--muted);border-radius:3px;flex:none;margin-top:3px;display:grid;place-items:center;font-size:12px;line-height:1}
+.form .cta{background:var(--accent);color:var(--paper);text-align:center;border-radius:6px;padding:10px;font-weight:600;margin-top:14px}
+.slack{border-left:3px solid var(--line);padding:4px 0 4px 14px;margin:12px 0;font-family:var(--f-ui);font-size:14.5px}
+.slack b{font-weight:600}
+.slack .t{color:var(--muted);font-size:12px;margin-left:6px}
+.sig{margin-top:26px}
+.home h1{max-width:none}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.card b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.card span{color:var(--muted);font-size:13px}
+.menu-toggle{display:none}
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr}
+  nav{display:none;border-right:0;border-bottom:1px solid var(--line)}
+  nav.open{display:block}
+  .menu-toggle{display:inline-block}
+  .sheet{padding:40px 20px 36px}
+  .stamp{top:12px;right:12px}
+  main{padding:18px 12px 60px}
+  .top .meta{display:none}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="banner">Exercice pédagogique ESIEA. Société, personnes, prestataires et documents entièrement fictifs.</div>
+<header class="top">
+  <button class="btn menu-toggle" id="menuBtn" aria-expanded="false" aria-controls="nav">Pièces</button>
+  <div class="logo">Bougeotte<span>.</span> data room</div>
+  <div class="meta">Contrôle du 23 novembre 2026 · accès réservé à l'équipe Bougeotte</div>
+  <div class="spacer"></div>
+  <button class="btn" id="homeBtn">Accueil</button>
+  <button class="btn primary" id="bordBtn">Bordereau</button>
+</header>
+<div class="layout">
+  <nav id="nav" aria-label="Pièces de la data room"></nav>
+  <main id="main"></main>
+</div>
+
+<script>
+const PIECES = [
+/* ============ 1. SOCIÉTÉ ============ */
+{id:"P01",folder:"Société",title:"Fiche d'identité et organigramme",date:"01/10/2026",fmt:"PDF",html:`
+<h1>Bougeotte SAS : fiche d'identité</h1>
+<p class="sub">Document interne, mis à jour pour la levée de fonds Série A</p>
+<h2>Identité</h2>
+<div class="tbl"><table>
+<tr><th>Dénomination</th><td>Bougeotte SAS</td></tr>
+<tr><th>Siège</th><td>18 rue des Tanneurs, 69007 Lyon (adresse fictive)</td></tr>
+<tr><th>SIREN</th><td>000 000 000 (fictif)</td></tr>
+<tr><th>Création</th><td>Mars 2019</td></tr>
+<tr><th>Effectif</th><td>42 salariés</td></tr>
+<tr><th>Activité</th><td>Application mobile de coaching sportif et bien-être (iOS, Android), offre grand public et offre entreprises</td></tr>
+</table></div>
+<h2>Chiffres clés (septembre 2026)</h2>
+<div class="tbl"><table>
+<tr><th>Comptes créés depuis 2019</th><td>380 000</td></tr>
+<tr><th>Utilisateurs actifs mensuels</th><td>96 000</td></tr>
+<tr><th>Abonnés Premium</th><td>61 000</td></tr>
+<tr><th>Clients entreprises (Bougeotte Entreprise)</th><td>27 employeurs, 11 400 salariés inscrits</td></tr>
+<tr><th>Montres et capteurs connectés</th><td>Synchronisation fréquence cardiaque, sommeil, pas</td></tr>
+</table></div>
+<h2>Fonctionnalités</h2>
+<ul>
+<li>Programmes d'entraînement personnalisés</li>
+<li>Suivi du poids, de la fréquence cardiaque et du sommeil</li>
+<li>Module <b>Cycle</b> : adaptation des séances selon la phase du cycle menstruel</li>
+<li>Journal <b>Météo intérieure</b> : humeur et niveau de stress déclarés chaque jour</li>
+<li>Bougeotte Entreprise : défis d'équipe et tableau de bord pour l'employeur</li>
+</ul>
+<h2>Organigramme</h2>
+<div class="tbl"><table>
+<tr><th>Fonction</th><th>Nom</th><th>Rattachement</th></tr>
+<tr><td>Présidente et cofondatrice</td><td>Camille Rocher</td><td>-</td></tr>
+<tr><td>CTO et cofondateur, DPO</td><td>Hugo Vasseur</td><td>Présidente</td></tr>
+<tr><td>Head of Growth</td><td>Inès Belkacem</td><td>Présidente</td></tr>
+<tr><td>Head of Data et IA</td><td>Nora Lefèvre</td><td>CTO</td></tr>
+<tr><td>Responsable B2B</td><td>Maxime Dupré</td><td>Présidente</td></tr>
+<tr><td>Responsable support (6 agents)</td><td>Théo Marchand</td><td>Head of Growth</td></tr>
+<tr><td>Lead développeur backend</td><td>Yanis Ferrand</td><td>CTO</td></tr>
+</table></div>
+<p>Pas de juriste interne. Un cabinet d'avocats est consulté ponctuellement pour les levées de fonds.</p>`},
+
+{id:"P02",folder:"Gouvernance",title:"Lettre de désignation du DPO",date:"04/01/2021",fmt:"PDF signé",html:`
+<h1>Lettre de désignation du délégué à la protection des données</h1>
+<p class="sub">Lyon, le 4 janvier 2021</p>
+<p>Objet : désignation d'un délégué à la protection des données (DPO)</p>
+<p>Je soussignée, Camille Rocher, Présidente de Bougeotte SAS, désigne <b>M. Hugo Vasseur</b>, Directeur technique (CTO), en qualité de délégué à la protection des données de la société, à compter de ce jour.</p>
+<p>M. Vasseur exercera cette mission en complément de ses fonctions de Directeur technique, selon ses disponibilités. Il reste rattaché hiérarchiquement à la Présidente au titre de ses fonctions de CTO.</p>
+<p>Aucun budget spécifique n'est alloué à cette mission à ce stade. Une formation pourra être envisagée en fonction de la croissance de l'activité.</p>
+<p>La désignation a été déclarée en ligne à la CNIL le 6 janvier 2021.</p>
+<p class="sig">Camille Rocher<br>Présidente</p>
+<p class="sig">Accepté par Hugo Vasseur</p>`},
+
+{id:"P03",folder:"Gouvernance",title:"Registre des activités de traitement",date:"14/03/2022",fmt:"Export tableur",html:`
+<h1>Registre des activités de traitement</h1>
+<p class="sub">Export du fichier « Registre_RGPD_v2.xlsx », onglet Traitements. Dernière modification : 14/03/2022 par H. Vasseur.</p>
+<div class="tbl"><table>
+<tr><th>#</th><th>Traitement</th><th>Finalité</th><th>Base légale</th><th>Données</th><th>Données sensibles</th><th>Destinataires</th><th>Durée</th><th>Transfert hors UE</th></tr>
+<tr><td>1</td><td>Comptes utilisateurs</td><td>Création et gestion du compte</td><td>Contrat</td><td>Identité, email, date de naissance</td><td>Non</td><td>Équipe produit</td><td>Durée du compte</td><td>Non</td></tr>
+<tr><td>2</td><td>Coaching</td><td>Programmes et suivi d'activité</td><td>Contrat</td><td>Activité, fréquence cardiaque, sommeil, poids</td><td>Non</td><td>Équipe produit, équipe data</td><td>Illimitée</td><td>Non</td></tr>
+<tr><td>3</td><td>Abonnements</td><td>Paiement et facturation</td><td>Contrat, obligation légale</td><td>Identité, historique d'achat</td><td>Non</td><td>Prestataire de paiement, comptable</td><td>10 ans</td><td>Non</td></tr>
+<tr><td>4</td><td>Newsletter</td><td>Informations sur l'application</td><td>Consentement</td><td>Email, prénom</td><td>Non</td><td>Kinomail (sous-traitant)</td><td>3 ans sans clic</td><td>Non</td></tr>
+<tr><td>5</td><td>Recrutement</td><td>Gestion des candidatures</td><td>Mesures précontractuelles</td><td>CV, lettre</td><td>Non</td><td>Managers</td><td>À définir</td><td>Non</td></tr>
+</table></div>
+<p class="note">Onglets « Sous-traitants » et « Mesures de sécurité » du fichier : vides.</p>`},
+
+{id:"P04",folder:"Gouvernance",title:"Politique de confidentialité v2.1",date:"02/05/2022",fmt:"Page web",html:`
+<h1>Politique de confidentialité</h1>
+<p class="sub">Version 2.1, en ligne sur l'application et le site depuis le 2 mai 2022</p>
+<h2>Qui sommes-nous ?</h2>
+<p>Bougeotte SAS est responsable du traitement de vos données. Contact : dpo@bougeotte.example</p>
+<h2>Quelles données ?</h2>
+<p>Nous collectons les informations de votre compte, vos séances, vos mesures (poids, fréquence cardiaque, sommeil) et les informations que vous saisissez dans l'application.</p>
+<h2>Pourquoi ?</h2>
+<p>Pour vous fournir nos services, les améliorer et vous proposer des offres adaptées, sur la base de notre contrat et de notre intérêt légitime.</p>
+<h2>Où sont vos données ?</h2>
+<p>Vos données sont hébergées exclusivement en France. <b>Elles ne quittent jamais l'Union européenne.</b></p>
+<h2>Combien de temps ?</h2>
+<p>Nous supprimons votre compte et vos données 3 ans après votre dernière connexion.</p>
+<h2>Avec qui ?</h2>
+<p>Nous ne vendons jamais vos données. <b>Nous ne partageons jamais vos données de santé avec votre employeur.</b></p>
+<h2>Vos droits</h2>
+<p>Vous pouvez demander l'accès, la rectification ou la suppression de vos données en écrivant à dpo@bougeotte.example. Nous répondons dans les meilleurs délais.</p>
+<h2>Âge minimum</h2>
+<p>L'application est accessible à partir de 13 ans.</p>`},
+
+/* ============ 2. PRODUIT ============ */
+{id:"P05",folder:"Produit",title:"Écran d'inscription (maquette en production)",date:"10/02/2025",fmt:"Capture Figma",html:`
+<h1>Parcours d'inscription : écran 2 sur 3</h1>
+<p class="sub">Maquette Figma « Onboarding v4 », en production depuis février 2025. Les champs marqués * sont obligatoires.</p>
+<div class="form">
+  <div class="f"><label>Prénom *</label><div class="in">Léa</div></div>
+  <div class="f"><label>Nom *</label><div class="in">Fournier</div></div>
+  <div class="f"><label>Date de naissance *</label><div class="in">JJ/MM/AAAA</div></div>
+  <div class="f"><label>Sexe *</label><div class="in">Femme / Homme</div></div>
+  <div class="f"><label>Poids et taille *</label><div class="in">kg · cm</div></div>
+  <div class="f"><label>Antécédents médicaux *</label><div class="in">Décrivez vos pathologies, traitements, opérations…</div></div>
+  <div class="f"><label>Numéro de sécurité sociale * <span style="font-weight:400">(pour nos partenaires mutuelles)</span></label><div class="in">1 89 05 69 …</div></div>
+  <div class="f"><label>Employeur</label><div class="in">Facultatif, pour rejoindre les défis de votre entreprise</div></div>
+  <div class="chk"><div class="box">✓</div><div>J'accepte de recevoir les offres de nos partenaires</div></div>
+  <div class="chk"><div class="box"></div><div>J'accepte les CGU et la politique de confidentialité *</div></div>
+  <div class="cta">Créer mon compte</div>
+</div>
+<p class="note">Commentaire Figma d'Inès Belkacem (Growth), 03/02/2025 : « On coche la case partenaires par défaut, ça fait +40 % d'opt-in sur l'A/B test. »</p>`},
+
+{id:"P06",folder:"Produit",title:"Offre Bougeotte Entreprise : plaquette et contrat type",date:"15/01/2026",fmt:"PDF",html:`
+<h1>Bougeotte Entreprise</h1>
+<p class="sub">Plaquette commerciale et extrait du contrat type signé avec les 27 employeurs clients</p>
+<h2>Plaquette</h2>
+<p><b>Des équipes en forme, des risques anticipés.</b> Offrez Bougeotte à vos collaborateurs et pilotez la santé de vos équipes.</p>
+<ul>
+<li>Défis sportifs entre services</li>
+<li><b>Tableau de bord RH</b> : score d'engagement et <b>indice de stress par collaborateur</b>, nominatif et exportable en CSV</li>
+<li><b>Alertes « risque burn-out »</b> : identifiez les collaborateurs dont le stress déclaré et le sommeil se dégradent</li>
+</ul>
+<h2>Extrait du contrat type</h2>
+<p><b>Article 6. Données.</b> Le Client reçoit chaque mois un export des indicateurs individuels de ses collaborateurs inscrits (nom, service, activité, fréquence cardiaque moyenne, sommeil, indice de stress issu de la Météo intérieure). Les collaborateurs ont consenti à ce partage en rejoignant l'espace de leur entreprise.</p>
+<p><b>Article 7. Rôles.</b> Bougeotte et le Client sont chacun responsables de leurs propres traitements.</p>
+<p class="note">Aucun accord de sous-traitance (article 28) ni accord entre responsables conjoints n'est annexé au contrat.</p>`},
+
+{id:"P07",folder:"Produit",title:"Projet IA « Blessure Zéro »",date:"22/09/2026",fmt:"Note Notion",html:`
+<h1>Projet « Blessure Zéro »</h1>
+<p class="sub">Page Notion de l'équipe Data, rédigée par Nora Lefèvre</p>
+<h2>Objectif</h2>
+<p>Entraîner un modèle qui prédit le risque de blessure de chaque utilisateur et lui propose d'alléger ses séances. Argument fort pour la Série A.</p>
+<h2>Données d'entraînement</h2>
+<p>Historique complet des 380 000 comptes depuis 2019, y compris les comptes inactifs et les comptes supprimés : séances, fréquence cardiaque, poids, sommeil, phase du cycle, antécédents médicaux (texte libre de l'inscription), indice de stress.</p>
+<h2>Base légale</h2>
+<p>Intérêt légitime (validé oralement avec Hugo le 20/09).</p>
+<h2>Information des utilisateurs</h2>
+<p>Pas nécessaire : c'est de l'amélioration du service, déjà prévue dans la politique de confidentialité.</p>
+<h2>Calendrier</h2>
+<p>Extraction des données faite le 21/09. Premier entraînement sur le cluster GPU de Nuage Hexagone en cours. Mise en production prévue en janvier 2027.</p>`},
+
+/* ============ 3. CONTRATS ============ */
+{id:"P08",folder:"Contrats",title:"Contrat d'hébergement Nuage Hexagone",date:"12/06/2023",fmt:"PDF signé",html:`
+<h1>Contrat de services d'hébergement et accord de sous-traitance</h1>
+<p class="sub">Entre Bougeotte SAS (responsable du traitement) et Nuage Hexagone SAS (sous-traitant). Signé le 12 juin 2023.</p>
+<h2>Objet</h2>
+<p>Hébergement de l'infrastructure de production de l'application Bougeotte (serveurs, bases de données, stockage objet) dans deux centres de données situés en France.</p>
+<h2>Annexe 3 : accord de sous-traitance (article 28 RGPD)</h2>
+<ol>
+<li>Le sous-traitant agit uniquement sur instruction documentée du responsable du traitement.</li>
+<li>Les personnes autorisées à traiter les données sont soumises à la confidentialité.</li>
+<li>Le sous-traitant met en œuvre les mesures de sécurité décrites en annexe 4 (chiffrement au repos, cloisonnement, journalisation, plan de continuité).</li>
+<li>Le recours à un sous-traitant ultérieur requiert l'autorisation écrite préalable du responsable du traitement.</li>
+<li>Le sous-traitant aide le responsable du traitement à répondre aux demandes d'exercice des droits et à respecter ses obligations de sécurité, de notification des violations et d'analyse d'impact.</li>
+<li>En fin de contrat, le sous-traitant supprime ou restitue les données, au choix du responsable du traitement.</li>
+<li>Le sous-traitant met à disposition les informations nécessaires et permet la réalisation d'audits.</li>
+<li>Le sous-traitant notifie toute violation de données dans un délai de 24 heures après en avoir pris connaissance.</li>
+</ol>
+<p>Aucun transfert de données hors de l'Union européenne. Nuage Hexagone est certifié Hébergeur de données de santé (HDS) et ISO 27001.</p>
+<p>Note : la configuration des droits d'accès aux espaces de stockage relève du client (Bougeotte), selon le modèle de responsabilité partagée décrit en annexe 4.</p>`},
+
+{id:"P09",folder:"Contrats",title:"Loopmetric : conditions acceptées et plan de marquage",date:"08/03/2024",fmt:"Capture + export",html:`
+<h1>Loopmetric Inc. : outil d'analytics produit</h1>
+<p class="sub">Société de droit du Delaware (États-Unis). Conditions acceptées en ligne. Aucun contrat négocié.</p>
+<h2>Message Slack, canal #tech</h2>
+<div class="slack"><b>Hugo Vasseur</b><span class="t">08/03/2024 14:12</span><br>J'ai accepté les CGU de Loopmetric en ligne, c'est gratuit jusqu'à 1 million d'événements par mois. SDK branché sur iOS et Android ce soir 🚀</div>
+<h2>Extrait des Terms of Service acceptés (version anglaise d'origine)</h2>
+<p><i>"Customer Data may be processed and stored in the United States and in any other country in which Loopmetric or its subprocessors maintain facilities. Loopmetric may use aggregated and de-identified Customer Data to improve its products and for benchmarking."</i></p>
+<p class="note">Aucun Data Processing Agreement signé. Aucune clause contractuelle type. Loopmetric ne figure pas sur la liste des entreprises certifiées au Data Privacy Framework UE-États-Unis à la date du contrôle (vérification de l'équipe Bougeotte, novembre 2026).</p>
+<h2>Plan de marquage (extrait)</h2>
+<div class="code">event: workout_completed
+  user_email        string   ex. lea.fournier@mail.example
+  user_id           string
+  hr_avg            int      fréquence cardiaque moyenne
+  weight_kg         float
+  cycle_phase       string   menstruation | folliculaire | ovulation | lutéale
+  mood_score        int      1 à 10, Météo intérieure
+  employer_name     string
+  device_ip         string</div>`},
+
+{id:"P10",folder:"Contrats",title:"Contrat Kinomail et accord de sous-traitance",date:"03/09/2022",fmt:"PDF signé",html:`
+<h1>Contrat de routage d'emails et accord de sous-traitance</h1>
+<p class="sub">Entre Bougeotte SAS et Kinomail SAS (Nantes, France). Signé le 3 septembre 2022.</p>
+<h2>Objet</h2>
+<p>Envoi des newsletters et des emails transactionnels de Bougeotte.</p>
+<h2>Accord de sous-traitance</h2>
+<ul>
+<li>Instructions documentées : listes et contenus fournis par Bougeotte uniquement.</li>
+<li>Données traitées : email, prénom, statistiques d'ouverture et de clic.</li>
+<li>Hébergement : France. Aucun sous-traitant ultérieur hors UE.</li>
+<li>Sécurité : chiffrement en transit et au repos, authentification forte des comptes clients.</li>
+<li>Assistance pour l'exercice des droits et la notification des violations (48 heures).</li>
+<li>Suppression des listes 30 jours après la fin du contrat.</li>
+<li>Droit d'audit du client, une fois par an.</li>
+</ul>`},
+
+/* ============ 4. SÉCURITÉ ============ */
+{id:"P11",folder:"Sécurité",title:"Politique de sécurité (PSSI) v1.2",date:"17/04/2023",fmt:"PDF",html:`
+<h1>Politique de sécurité des systèmes d'information</h1>
+<p class="sub">Version 1.2, validée par la Présidente le 17 avril 2023</p>
+<h2>Règles</h2>
+<ol>
+<li>Chaque personne dispose d'un compte nominatif. Les comptes partagés sont interdits.</li>
+<li>L'authentification à deux facteurs est obligatoire pour toutes les consoles d'administration.</li>
+<li>Les mots de passe ne sont jamais transmis par email, chat ou ticket. Un gestionnaire de mots de passe est fourni.</li>
+<li>Les droits d'accès sont revus tous les six mois par le CTO.</li>
+<li>Aucune donnée d'utilisateur n'est stockée sur un poste ou un service personnel.</li>
+<li>Les espaces de stockage cloud sont privés par défaut. Toute exposition publique est validée par le CTO.</li>
+<li>Les journaux d'accès sont conservés 6 mois.</li>
+</ol>
+<p class="note">Aucune trace de revue des accès n'a été retrouvée pour 2024, 2025 et 2026.</p>`},
+
+{id:"P12",folder:"Sécurité",title:"Ticket support SUP-4821",date:"18/10/2026",fmt:"Export Jira",html:`
+<h1>SUP-4821 : accès console admin pour le nouvel agent</h1>
+<p class="sub">Projet Support · Priorité normale · Statut : Résolu</p>
+<div class="mail"><div class="h">Théo Marchand · 18/10/2026 09:41</div><div class="b">
+<p>Salut Yanis, Kevin démarre lundi au support. Tu peux lui donner l'accès à la console admin ?</p></div></div>
+<div class="mail"><div class="h">Yanis Ferrand · 18/10/2026 10:02</div><div class="b">
+<p>Il prend le compte commun comme les autres :<br>
+<span style="font-family:var(--f-mono)">login : support@bougeotte.example<br>mdp : Bougeotte2019!</span></p>
+<p>Pas de 2FA dessus sinon c'est l'enfer avec 6 personnes.</p></div></div>
+<div class="mail"><div class="h">Théo Marchand · 18/10/2026 10:05</div><div class="b">
+<p>Top merci. Pour info, les agents exportent les fiches utilisateurs en CSV depuis la console quand ils bossent de chez eux, ils les mettent sur leur Google Drive perso pour aller plus vite.</p></div></div>
+<p class="note">La console admin donne accès en lecture à l'ensemble du profil : identité, mesures, antécédents médicaux, Météo intérieure, module Cycle.</p>`},
+
+{id:"P13",folder:"Sécurité",title:"Incident du stockage « exports-prod »",date:"11/09/2026",fmt:"Fil d'emails",html:`
+<h1>Fil d'emails : stockage exports-prod</h1>
+<p class="sub">Extrait de la messagerie de Camille Rocher, transmis par la direction</p>
+<div class="mail"><div class="h">De : Yanis Ferrand<br>À : Hugo Vasseur<br>Date : 11/09/2026 08:17<br>Objet : URGENT bucket exports-prod public</div><div class="b">
+<p>Hugo, je viens de voir que l'espace de stockage <span style="font-family:var(--f-mono)">bougeotte-exports-prod</span> est en lecture publique depuis le 2 septembre (mauvaise manip pendant la migration). Il contient les 14 exports mensuels Bougeotte Entreprise : nom, email, employeur, fréquence cardiaque moyenne, sommeil, indice de stress. Environ 9 800 salariés concernés.</p>
+<p>Dans les logs je vois 37 téléchargements depuis 3 adresses IP qui ne sont pas à nous. Je ferme tout de suite ?</p></div></div>
+<div class="mail"><div class="h">De : Hugo Vasseur<br>À : Yanis Ferrand, Camille Rocher<br>Date : 11/09/2026 08:40</div><div class="b">
+<p>Ferme immédiatement. Camille, on doit en parler.</p></div></div>
+<div class="mail"><div class="h">De : Camille Rocher<br>À : Hugo Vasseur<br>Date : 11/09/2026 19:02</div><div class="b">
+<p>On ne sait pas qui a téléchargé, ça peut être des robots. Rien ne prouve que les données ont été utilisées. On est en pleine due diligence Série A : <b>on ne notifie pas</b>, ni la CNIL ni les gens. On ferme, on corrige, et on n'en parle plus.</p></div></div>
+<div class="mail"><div class="h">De : Hugo Vasseur<br>À : Camille Rocher<br>Date : 11/09/2026 19:15</div><div class="b">
+<p>OK. C'est fermé depuis 8h45.</p></div></div>`},
+
+{id:"P14",folder:"Sécurité",title:"Registre des violations de données",date:"01/10/2026",fmt:"Document Word",html:`
+<h1>Registre des violations de données à caractère personnel</h1>
+<p class="sub">Tenu par le DPO. Dernière mise à jour : 1er octobre 2026.</p>
+<div class="tbl"><table>
+<tr><th>Date</th><th>Nature</th><th>Personnes concernées</th><th>Conséquences</th><th>Mesures prises</th><th>Notification CNIL</th><th>Information des personnes</th></tr>
+<tr><td colspan="7" style="text-align:center;color:var(--muted)">Aucune violation de données à ce jour.</td></tr>
+</table></div>`},
+
+/* ============ 5. DROITS DES PERSONNES ============ */
+{id:"P15",folder:"Droits des personnes",title:"Demande d'accès de Mme Fournier",date:"12/08/2026",fmt:"Fil d'emails",html:`
+<h1>Demande de droit d'accès</h1>
+<p class="sub">Boîte support@bougeotte.example</p>
+<div class="mail"><div class="h">De : Léa Fournier<br>Date : 12/08/2026 21:33<br>Objet : Demande d'accès à mes données</div><div class="b">
+<p>Bonjour, je souhaite recevoir une copie de toutes les données que vous détenez sur moi, et savoir si vous les avez transmises à mon employeur (j'utilise Bougeotte via mon entreprise). Merci.</p></div></div>
+<div class="mail"><div class="h">Note interne Zendesk · Théo Marchand · 13/08/2026</div><div class="b">
+<p>À transférer au DPO. Pas de modèle de réponse pour ce cas.</p></div></div>
+<div class="mail"><div class="h">De : Léa Fournier<br>Date : 15/09/2026 08:02<br>Objet : RE: Demande d'accès à mes données</div><div class="b">
+<p>Bonjour, sans réponse depuis plus d'un mois. Je relance.</p></div></div>
+<div class="mail"><div class="h">De : Léa Fournier<br>Date : 20/10/2026 12:47<br>Objet : RE: RE: Demande d'accès à mes données</div><div class="b">
+<p>Toujours rien. Mon manager m'a parlé de mon « indice de stress » en entretien annuel. Je saisis la CNIL.</p></div></div>
+<p class="note">Statut du ticket au 22/11/2026 : ouvert, non assigné.</p>`},
+
+{id:"P16",folder:"Droits des personnes",title:"Extrait de la base : comptes et suppressions",date:"20/11/2026",fmt:"Requête SQL",html:`
+<h1>Extrait de la base de production</h1>
+<p class="sub">Requêtes exécutées par Yanis Ferrand à la demande de la direction, en préparation du contrôle</p>
+<div class="code">SELECT
+  CASE
+    WHEN last_login &gt;= now() - interval '1 year'  THEN 'moins de 1 an'
+    WHEN last_login &gt;= now() - interval '3 years' THEN '1 à 3 ans'
+    ELSE 'plus de 3 ans'
+  END AS anciennete, count(*)
+FROM users WHERE is_deleted = false GROUP BY 1;
+
+ anciennete     | count
+----------------+---------
+ moins de 1 an  | 148 230
+ 1 à 3 ans      | 110 428
+ plus de 3 ans  | 112 412
+
+SELECT min(last_login) FROM users WHERE is_deleted = false;
+ 2019-04-02 10:14:51
+
+SELECT count(*) FROM users WHERE is_deleted = true;
+ 8 930</div>
+<p>Commentaire de Yanis : « La suppression de compte dans l'app met juste <span style="font-family:var(--f-mono)">is_deleted = true</span>. Toutes les données restent en base, c'est plus simple si l'utilisateur revient. Aucun script de purge n'a jamais tourné. »</p>`},
+
+/* ============ 6. MARKETING ============ */
+{id:"P17",folder:"Marketing",title:"Campagne d'acquisition « Rentrée 2026 »",date:"25/08/2026",fmt:"Brief + bilan",html:`
+<h1>Brief campagne « Rentrée 2026 »</h1>
+<p class="sub">Rédigé par Inès Belkacem, Head of Growth</p>
+<h2>Cible</h2>
+<p>50 000 particuliers « intéressés par le sport et la santé », fichier acheté au courtier DataSport Leads (12 000 € HT). Le courtier indique que les contacts ont « accepté de recevoir des offres » sur des sites de jeux concours.</p>
+<h2>Canal</h2>
+<p>Email, envoyé via Kinomail, objet : « Léa, votre coach vous attend 💪 ». Lien de désinscription en bas de page.</p>
+<h2>Base légale</h2>
+<p>Intérêt légitime (validé par Hugo).</p>
+<h2>Bilan au 30/09/2026</h2>
+<div class="tbl"><table>
+<tr><th>Emails envoyés</th><td>50 000</td></tr>
+<tr><th>Comptes créés</th><td>1 140</td></tr>
+<tr><th>Désinscriptions</th><td>3 870</td></tr>
+<tr><th>Plaintes reçues par email</th><td>12, dont 3 demandant « où avez-vous eu mon adresse ? » (sans réponse)</td></tr>
+</table></div>
+<p class="note">Le fichier DataSport Leads est toujours stocké sur le drive Growth. Aucun contrat avec le courtier en dehors de la facture.</p>`},
+
+{id:"P18",folder:"Marketing",title:"Formulaire de consentement cookies du site",date:"05/06/2025",fmt:"Note technique",html:`
+<h1>Bandeau cookies du site bougeotte.example</h1>
+<p class="sub">Note de configuration du gestionnaire de balises, rédigée par l'équipe Growth</p>
+<h2>Configuration actuelle</h2>
+<ul>
+<li>Bandeau affiché en bas de page : « En poursuivant votre navigation, vous acceptez nos cookies. » Bouton unique : <b>OK</b>.</li>
+<li>Lien « Personnaliser » en gris clair, qui ouvre une page de 4 écrans avec les cases déjà cochées.</li>
+<li>Balises déposées au chargement de la page, avant toute action : Loopmetric, pixel publicitaire de deux réseaux sociaux, outil d'enregistrement de session.</li>
+<li>Durée de vie des cookies publicitaires : 25 mois.</li>
+</ul>
+<p class="note">Cette pièce sert de support à l'exercice de contrôle en ligne. Elle décrit la configuration, les contrôleurs doivent la constater eux-mêmes sur la maquette du site.</p>`}
+];
+
+const nav = document.getElementById('nav');
+const main = document.getElementById('main');
+const menuBtn = document.getElementById('menuBtn');
+let sent = {};
+try { sent = JSON.parse(localStorage.getItem('bougeotte-sent') || '{}'); } catch(e) { sent = {}; }
+function saveSent(){ try { localStorage.setItem('bougeotte-sent', JSON.stringify(sent)); } catch(e){} }
+
+function renderNav(current){
+  const folders = [...new Set(PIECES.map(p => p.folder))];
+  nav.innerHTML = folders.map(f => `
+    <div class="folder">${f}</div>
+    ${PIECES.filter(p => p.folder === f).map(p => `
+      <button class="item" data-id="${p.id}" aria-current="${p.id === current}">
+        <span class="ref">${p.id}</span><span>${p.title}</span>${sent[p.id] ? '<span class="sent">envoyée</span>' : '<span></span>'}
+      </button>`).join('')}
+  `).join('');
+  nav.querySelectorAll('.item').forEach(b => b.addEventListener('click', () => { location.hash = b.dataset.id.toLowerCase(); closeMenu(); }));
+}
+
+function renderPiece(p){
+  const isSent = !!sent[p.id];
+  main.innerHTML = `
+    <div class="docbar">
+      <div class="info">${p.id} · ${p.folder} · ${p.fmt} · ${p.date}</div>
+      <button class="btn ${isSent ? '' : 'primary'}" id="sendBtn">${isSent ? 'Retirer du bordereau' : 'Marquer comme communiquée'}</button>
+    </div>
+    <article class="sheet"><div class="stamp">FICTIF</div>${p.html}</article>`;
+  document.getElementById('sendBtn').addEventListener('click', () => {
+    if (sent[p.id]) delete sent[p.id];
+    else sent[p.id] = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    saveSent(); route();
+  });
+  main.scrollTop = 0; window.scrollTo(0,0);
+}
+
+function renderHome(){
+  const folders = [...new Set(PIECES.map(p => p.folder))];
+  main.innerHTML = `
+    <article class="sheet home"><div class="stamp">FICTIF</div>
+      <h1>Data room de contrôle</h1>
+      <p class="sub">Bougeotte SAS · application de coaching sportif et bien-être · Lyon</p>
+      <p>Ce dossier rassemble les documents internes de Bougeotte. Il est réservé à l'équipe contrôlée. Les contrôleurs n'y ont pas accès : ils doivent demander chaque pièce.</p>
+      <p>Quand vous remettez une pièce aux contrôleurs, cliquez sur <b>Marquer comme communiquée</b>. Le bordereau se remplit tout seul, avec l'heure de remise.</p>
+      <div class="cards">
+        <div class="card"><b>${PIECES.length}</b><span>pièces disponibles</span></div>
+        <div class="card"><b>${folders.length}</b><span>dossiers</span></div>
+        <div class="card"><b>${Object.keys(sent).length}</b><span>pièces communiquées</span></div>
+      </div>
+      <h2>Rappel</h2>
+      <p>Vous ne pouvez pas mentir aux contrôleurs ni détruire de pièce. Vous pouvez choisir l'ordre, le rythme et la manière de répondre.</p>
+    </article>`;
+}
+
+function renderBordereau(){
+  const rows = PIECES.filter(p => sent[p.id]);
+  const text = 'Bordereau de communication de pièces - Bougeotte SAS - contrôle du 23/11/2026\n' +
+    rows.map(p => `${p.id} | ${p.title} | remise à ${sent[p.id]}`).join('\n');
+  main.innerHTML = `
+    <article class="sheet"><div class="stamp">FICTIF</div>
+      <h1>Bordereau de communication de pièces</h1>
+      <p class="sub">Contrôle du 23 novembre 2026 · Bougeotte SAS</p>
+      ${rows.length ? `<div class="tbl"><table><tr><th>Pièce</th><th>Intitulé</th><th>Remise</th></tr>
+        ${rows.map(p => `<tr><td style="font-family:var(--f-mono)">${p.id}</td><td>${p.title}</td><td>${sent[p.id]}</td></tr>`).join('')}
+      </table></div>` : '<p>Aucune pièce communiquée pour le moment.</p>'}
+      <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
+        <button class="btn primary" id="copyBtn">Copier le bordereau</button>
+        <button class="btn" id="resetBtn">Vider le bordereau</button>
+        <span id="msg" style="color:var(--muted);font-size:13px;align-self:center"></span>
+      </div>
+    </article>`;
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    const msg = document.getElementById('msg');
+    try { await navigator.clipboard.writeText(text); msg.textContent = 'Bordereau copié.'; }
+    catch(e){ msg.textContent = 'Copie refusée par le navigateur : sélectionnez le tableau à la main.'; }
+  });
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    const b = document.getElementById('resetBtn');
+    if (b.dataset.confirm) { sent = {}; saveSent(); route(); }
+    else { b.dataset.confirm = '1'; b.textContent = 'Cliquer encore pour confirmer'; }
+  });
+}
+
+function route(){
+  const h = (location.hash || '').replace('#','').toUpperCase();
+  const p = PIECES.find(x => x.id === h);
+  if (p) { renderNav(p.id); renderPiece(p); }
+  else if (h === 'BORDEREAU') { renderNav(null); renderBordereau(); }
+  else { renderNav(null); renderHome(); }
+}
+function closeMenu(){ nav.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); }
+menuBtn.addEventListener('click', () => { const o = nav.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(o)); });
+document.getElementById('homeBtn').addEventListener('click', () => { location.hash = 'accueil'; });
+document.getElementById('bordBtn').addEventListener('click', () => { location.hash = 'bordereau'; });
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>

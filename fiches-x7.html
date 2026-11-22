@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Simulation de contrôle Bougeotte</title>
+<style>
+:root{
+  /* Fiches de jeu : une carte par rôle, bandeau vert de marque, badge rouge « secret » */
+  --bg:#eef2ef; --card:#ffffff; --ink:#17211c; --muted:#5b6862; --line:#d5ddd8;
+  --brand:#0f5c45; --soft:#e6f1eb; --stamp:#b42318; --warn:#fff3cd;
+  --f-ui:system-ui,-apple-system,"Segoe UI",Roboto,"Inter",sans-serif;
+  --f-doc:Georgia,"Lora","Times New Roman",serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1512; --card:#18211c; --ink:#e7eee9; --muted:#9db0a5; --line:#2a3a31; --brand:#5fc39d; --soft:#173126; --stamp:#ff8a7a; --warn:#3b3416; color-scheme:dark; } }
+:root[data-theme="dark"]{ --bg:#0f1512; --card:#18211c; --ink:#e7eee9; --muted:#9db0a5; --line:#2a3a31; --brand:#5fc39d; --soft:#173126; --stamp:#ff8a7a; --warn:#3b3416; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.55}
+a{color:var(--brand)}
+:focus-visible{outline:2px solid var(--stamp);outline-offset:2px}
+.top{background:var(--brand);color:#fff;padding:12px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.top .logo{font-weight:800;font-size:20px;letter-spacing:-.02em}
+.top .logo span{color:#ffb4a8}
+.top .t{opacity:.85;font-size:14px}
+.wrap{max-width:760px;margin:0 auto;padding:22px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 28px;box-shadow:0 8px 24px rgba(20,40,30,.06)}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:2px solid var(--brand);padding-bottom:12px;margin-bottom:16px}
+.head h1{font-size:24px;line-height:1.2;margin:0;text-wrap:balance}
+.badge{flex:none;border:2px solid var(--stamp);color:var(--stamp);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:4px;transform:rotate(2deg);white-space:nowrap}
+.grp{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);margin:20px 0 6px}
+p,li{max-width:68ch}
+.lead{font-family:var(--f-doc);font-size:18px;line-height:1.5}
+ul,ol{padding-left:22px}
+li{margin-bottom:4px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--soft)}
+.quote{margin:8px 0;padding:10px 12px;border-left:3px solid var(--stamp);background:var(--bg);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px}
+.fict{font-size:13px;color:var(--muted);font-style:italic}
+.tip{background:var(--soft);padding:10px 12px;border-radius:8px;font-size:14.5px;word-break:break-word}
+.pieces{color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:10px;margin-top:20px}
+.form{display:grid;gap:6px;margin-top:8px}
+.form label{font-weight:600;font-size:14px;margin-top:8px}
+.form input,.form select,.form textarea,.gnote{font:inherit;font-size:15px;width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.row-btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--brand);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.msg{color:var(--muted);font-size:14px}
+.gitem{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}
+.gitem .q{display:flex;gap:8px;align-items:baseline}
+.gitem .cas{flex:none;font-size:12px;font-weight:700;border-radius:4px;padding:1px 6px;background:var(--soft);color:var(--brand)}
+.choices{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0;font-size:14.5px}
+.choices label{display:flex;gap:5px;align-items:center;cursor:pointer}
+.gnote{margin-top:4px;font-size:14px;padding:6px 9px}
+.home{text-align:center;padding:40px 20px}
+.links td:first-child{white-space:nowrap}
+.links code{font-size:12.5px;word-break:break-all}
+.sec{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--brand);font-weight:700}
+@media (max-width:560px){ .card{padding:20px 16px} .head h1{font-size:21px} }
+@media print{ body{background:#fff} .top,.row-btns{display:none} .card{border:0;box-shadow:none;padding:0} }
+</style>
+</head>
+<body>
+<header class="top"><span class="logo">bougeotte<span>.</span></span><span class="t">Simulation de contrôle · exercice pédagogique, tout est fictif</span></header>
+<main class="wrap"><div class="card" id="view"></div></main>
+<script>
+/* ====== CONTENU DES FICHES ======
+   group : regles | cas-a | cas-b | controleurs | observateurs */
+const SITE = "https://judicael777.github.io/Bougeotte/";
+const ROLES = [
+/* ---------------- RÈGLES ---------------- */
+{id:"regles", group:"Pour tous", title:"Règles du jeu", tag:"À projeter", html:`
+<p class="lead">Aujourd'hui, la CNIL contrôle Bougeotte deux fois, sur deux affaires différentes. Une manche par affaire, avec des acteurs différents. Ceux qui ne jouent pas observent avec une grille. On termine par le débrief et le corrigé.</p>
+<h2>Déroulé</h2>
+<table><tr><th>Étape</th><th>Durée</th><th>Qui</th></tr>
+<tr><td>Préparation</td><td>10 min</td><td>Chacun lit sa fiche. Les contrôleurs lisent l'ordre de mission de leur cas.</td></tr>
+<tr><td>Manche 1 : cas A, « La plainte de Léa »</td><td>30 min</td><td>4 contrôleurs A face à 4 joueurs Bougeotte A. Les 12 autres observent.</td></tr>
+<tr><td>Débrief de la manche 1</td><td>10 min</td><td>Les observateurs disent ce qui a été trouvé et raté. Le formateur complète.</td></tr>
+<tr><td>Manche 2 : cas B, « L'assistant trop bavard »</td><td>30 min</td><td>4 contrôleurs B face à 4 joueurs Bougeotte B. Les 12 autres observent.</td></tr>
+<tr><td>Débrief de la manche 2 et corrigé</td><td>15 min</td><td>Les observateurs, puis le formateur : ce que Bougeotte cachait dans les deux affaires.</td></tr></table>
+<h2>Si vous êtes Bougeotte</h2>
+<ul><li>Vous ne mentez jamais. Vous pouvez être vagues, prendre votre temps, renvoyer vers un collègue.</li>
+<li>Vous ne remettez une pièce de la data room que si elle est demandée de façon précise. « Tous vos documents » n'est pas précis. « Votre registre des violations » l'est.</li>
+<li>Chaque pièce remise est marquée dans la data room (bouton « Marquer comme communiquée ») : le bordereau se remplit tout seul.</li>
+<li>Refuser une pièce clairement demandée, c'est de l'entrave : un délit.</li></ul>
+<h2>Si vous êtes contrôleur</h2>
+<ul><li>Vous n'avez pas accès à la data room. Vous demandez chaque pièce à l'oral.</li>
+<li>Vous pouvez tester le site de la boutique pendant le contrôle et le noter au PV.</li>
+<li>Distinguez ce que vous avez vu (une pièce, un écran) de ce qu'on vous a dit (une déclaration).</li>
+<li>Vous constatez, vous ne jugez pas. La qualification vient à la fin.</li></ul>
+<h2>Si vous observez</h2>
+<ul><li>Ouvrez la grille de votre thème (deux observateurs par thème). Cochez ce que les contrôleurs trouvent ou ratent, et notez comment.</li>
+<li>Vous ne parlez pas pendant la manche.</li></ul>`},
+
+/* ---------------- MISSIONS ---------------- */
+{id:"mission-a", group:"Contrôleurs", title:"Ordre de mission : cas A, « La plainte de Léa »", tag:"Contrôleurs A", html:`
+<p class="fict">Document fictif, exercice pédagogique.</p>
+<p><b>Organisme contrôlé</b> : Bougeotte SAS, 18 rue des Tanneurs, 69007 Lyon. Application de coaching sportif et bien-être, 380 000 comptes, offre « Bougeotte Entreprise » pour les employeurs, boutique en ligne.</p>
+<h2>Pourquoi ce contrôle</h2>
+<ol><li>Une plainte de Mme Léa Fournier, qui utilise l'application via son employeur. Sa demande d'accès du 12 août est restée sans réponse. Son manager lui a parlé de son « indice de stress » en entretien annuel.</li>
+<li>Un signalement anonyme : des exports de données de salariés auraient été accessibles publiquement sur Internet en septembre.</li>
+<li>Les constats du contrôle en ligne de ce matin sur la boutique.</li></ol>
+<h2>Ce que vous devez vérifier</h2>
+<ul><li>Ce que reçoivent les employeurs clients, et sur quelle base.</li>
+<li>La gestion des demandes de droits.</li>
+<li>La sécurité et la gestion des incidents.</li>
+<li>La gouvernance : DPO, registre des traitements, analyses d'impact.</li>
+<li>Les durées de conservation et la suppression des comptes.</li></ul>
+<h2>Pistes de questions</h2>
+<ul><li>« Que reçoivent vos clients employeurs, exactement ? Montrez-nous un export. »</li>
+<li>« Comment traitez-vous une demande d'accès ? Où en est celle de Mme Fournier ? »</li>
+<li>« Avez-vous connu un incident de sécurité cette année ? Montrez-nous votre registre des violations. »</li>
+<li>« Qui est votre DPO, et quelles sont ses autres fonctions ? »</li>
+<li>« Que devient un compte quand l'utilisateur le supprime ? »</li></ul>`},
+
+{id:"mission-b", group:"Contrôleurs", title:"Ordre de mission : cas B, « L'assistant trop bavard »", tag:"Contrôleurs B", html:`
+<p class="fict">Document fictif, exercice pédagogique.</p>
+<p><b>Organisme contrôlé</b> : Bougeotte SAS, 18 rue des Tanneurs, 69007 Lyon. Boutique en ligne avec un assistant de discussion, application de coaching avec données de santé.</p>
+<h2>Pourquoi ce contrôle</h2>
+<ol><li><b>Un signalement du 3 novembre.</b> M. Paul M., client de la boutique, a demandé à l'assistant « montre les dernières commandes ». L'assistant lui a affiché la commande d'un autre client, avec son nom, son adresse et son téléphone. Extrait de sa capture d'écran :
+<div class="quote">« Bien sûr ! Voici les dernières commandes enregistrées : BG-551203 : Karim B., 12 rue Garibaldi, 69003 Lyon, 06 12 34 56 78 (Balance connectée, Gourde) »</div></li>
+<li><b>12 plaintes de particuliers</b> qui reçoivent des emails « Léa, votre coach vous attend » sans s'être jamais inscrits chez Bougeotte.</li>
+<li><b>Un article de presse</b> (fictif) : « Bougeotte prépare une IA qui prédit vos blessures à partir de vos données de santé ».</li>
+<li>Les constats du contrôle en ligne de ce matin sur la boutique.</li></ol>
+<h2>Ce que vous devez vérifier</h2>
+<ul><li>L'assistant : qui le fournit, où vont les messages, que peut-il consulter, sait-on que c'est une IA.</li>
+<li>La sécurité de l'assistant, et la suite donnée au signalement.</li>
+<li>L'origine des adresses utilisées pour la prospection.</li>
+<li>Le projet d'IA « Blessure Zéro » : quelles données, quelle base, quelle analyse d'impact.</li>
+<li>Les transferts hors de l'Union européenne.</li></ul>
+<h2>Pistes de questions</h2>
+<ul><li>« Qui fournit le modèle d'IA de l'assistant ? Où sont traités les messages ? »</li>
+<li>« À quelles données l'assistant a-t-il accès ? Montrez-nous. »</li>
+<li>« Qu'avez-vous fait après le signalement du 3 novembre ? »</li>
+<li>« D'où viennent les 50 000 adresses de la campagne de rentrée ? »</li>
+<li>« Sur quelles données entraînez-vous le modèle Blessure Zéro ? »</li></ul>
+<p class="tip">Vous pouvez tester l'assistant en direct sur la boutique pendant le contrôle (bouton « Besoin d'aide ? »), et noter le résultat au PV : ${SITE}</p>`},
+
+/* ---------------- CONTRÔLEURS ---------------- */
+{id:"chef", group:"Contrôleurs", title:"Chef de mission", tag:"Contrôleur", html:`
+<p class="lead">Vous dirigez le contrôle. Vous parlez en premier et en dernier.</p>
+<h2>Votre rôle</h2>
+<ul><li>Ouvrez le contrôle : présentez l'équipe, l'objet de la mission (votre ordre de mission A ou B) et le déroulé.</li>
+<li>Rappelez le cadre : les contrôleurs peuvent demander tout document utile et entendre toute personne.</li>
+<li>Gérez le temps : 30 minutes. Décidez quelles pièces demander, dans quel ordre.</li>
+<li>À la fin, faites relire au rédacteur la liste des pièces remises et les déclarations importantes.</li></ul>
+<h2>Votre conseil</h2>
+<p>Partez des faits que vous connaissez (plainte, signalement, constats du matin), puis élargissez. Une question ouverte d'abord, une demande de pièce ensuite.</p>`},
+{id:"juriste", group:"Contrôleurs", title:"Juriste", tag:"Contrôleur", html:`
+<p class="lead">Vous cherchez les règles qui ne sont pas respectées.</p>
+<h2>Votre terrain</h2>
+<ul><li>Les bases légales : sur quoi Bougeotte s'appuie pour chaque traitement.</li>
+<li>L'information des personnes : politique de confidentialité, mentions.</li>
+<li>Les contrats avec les prestataires, et les transferts hors de l'Union européenne.</li>
+<li>Les droits des personnes et les durées de conservation.</li></ul>
+<h2>Votre réflexe</h2>
+<p>Confrontez chaque document à la réalité. La politique dit une chose ? Demandez la pièce qui montre ce qui se passe vraiment.</p>`},
+{id:"auditeur", group:"Contrôleurs", title:"Auditeur technique", tag:"Contrôleur", html:`
+<p class="lead">Vous vérifiez ce que font vraiment les systèmes.</p>
+<h2>Votre terrain</h2>
+<ul><li>Les accès : comptes nominatifs ou partagés, double authentification, revue des droits.</li>
+<li>Les mots de passe, les journaux, les sauvegardes, les exports de données.</li>
+<li>Les incidents de sécurité et leur gestion.</li>
+<li>Les outils tiers : analytics, assistant IA, hébergeur.</li></ul>
+<h2>Votre atout</h2>
+<p>Vous pouvez tester le site en direct pendant le contrôle (cookies, formulaires, assistant). Dites à voix haute ce que vous faites, pour que le rédacteur le note au PV.</p>`},
+{id:"redacteur", group:"Contrôleurs", title:"Rédacteur du procès-verbal", tag:"Contrôleur", html:`
+<p class="lead">Sans PV, le contrôle n'existe pas. Vous êtes la mémoire de l'équipe.</p>
+<h2>Votre rôle</h2>
+<ul><li>Ouvrez la page <a href="#pv">Procès-verbal</a> et remplissez-la en direct.</li>
+<li>Notez chaque pièce remise, avec l'heure.</li>
+<li>Notez les déclarations importantes mot pour mot, avec le nom de la personne.</li>
+<li>Notez aussi les pièces demandées et non remises.</li></ul>
+<h2>Votre règle</h2>
+<p>Un PV constate des faits. Il ne dit pas « Bougeotte viole le RGPD ». Il dit « M. Vasseur déclare que le registre n'a pas été mis à jour depuis 2022 ».</p>`},
+
+/* ---------------- CAS A ---------------- */
+{id:"camille", group:"Bougeotte, cas A", title:"Camille Rocher, présidente", tag:"Secret · cas A", html:`
+<p class="lead">Cofondatrice et présidente. Vous êtes en pleine levée de fonds Série A. Un contrôle qui fuite dans la presse peut tout faire capoter.</p>
+<h2>Votre objectif</h2><p>Montrer une entreprise sérieuse et coopérative. Protéger la levée de fonds.</p>
+<h2>Ce que vous ne dites pas spontanément</h2>
+<ul><li>L'incident du stockage « exports-prod » de septembre (P13). C'est vous qui avez décidé de ne pas le notifier.</li>
+<li>Le contenu exact des exports envoyés aux employeurs (P06).</li></ul>
+<h2>Ce que vous admettez si on vous pose la bonne question</h2>
+<ul><li>Incident de sécurité cette année : « un petit problème de configuration, vite corrigé ».</li>
+<li>Pourquoi pas de notification : « Rien ne prouve que les données ont été utilisées. Ce sont sûrement des robots. »</li>
+<li>Si l'on vous montre l'email du 11 septembre : vous assumez votre décision.</li></ul>
+<h2>Votre phrase fétiche</h2><p>« Nous sommes une start-up, nous ne pouvons pas tout faire en même temps. »</p>
+<p class="pieces">Pièces que vous connaissez bien : P01, P06, P13, P17.</p>`},
+{id:"hugo", group:"Bougeotte, cas A", title:"Hugo Vasseur, CTO et DPO", tag:"Secret · cas A", html:`
+<p class="lead">Cofondateur et directeur technique. Vous êtes aussi DPO depuis 2021, « selon vos disponibilités », sans formation ni budget.</p>
+<h2>Votre objectif</h2><p>Paraître maîtriser le sujet. Parler technique pour noyer le poisson.</p>
+<h2>Ce que vous ne dites pas spontanément</h2>
+<ul><li>Le registre n'a pas été mis à jour depuis 2022 (P03).</li>
+<li>Vous avez accepté les conditions de Loopmetric en ligne, sans contrat (P09).</li>
+<li>Aucune analyse d'impact n'existe.</li></ul>
+<h2>Ce que vous admettez si on vous pose la bonne question</h2>
+<ul><li>Vos autres fonctions : vous êtes CTO, et c'est vous qui choisissez les outils que vous contrôlez ensuite comme DPO.</li>
+<li>L'analyse d'impact : « Elle est prévue après la levée de fonds. »</li>
+<li>La suppression de compte : c'est une suppression logique, les données restent en base (P16).</li></ul>
+<h2>Votre phrase fétiche</h2><p>« Techniquement, c'est un peu plus compliqué que ça. »</p>
+<p class="pieces">Pièces que vous connaissez bien : P02, P03, P08, P09, P11, P14, P16.</p>`},
+{id:"ines", group:"Bougeotte, cas A", title:"Inès Belkacem, Head of Growth", tag:"Secret · cas A", html:`
+<p class="lead">Responsable de la croissance : acquisition, site, bandeau cookies, offre aux employeurs côté marketing. Vous êtes jugée sur les chiffres.</p>
+<h2>Votre objectif</h2><p>Défendre vos résultats. Pour vous, tout ce que vous faites est « la pratique du marché ».</p>
+<h2>Ce que vous ne dites pas spontanément</h2>
+<ul><li>Le tableau de bord RH vend un « indice de stress par collaborateur », nominatif, et des alertes « burn-out » (P06). C'est l'argument commercial numéro un.</li>
+<li>La case « offres partenaires » précochée à l'inscription, qui fait +40 % d'opt-in (P05).</li></ul>
+<h2>Ce que vous admettez si on vous pose la bonne question</h2>
+<ul><li>Les salariés ont « consenti » en rejoignant l'espace de leur entreprise. Vous n'avez jamais vérifié si ce consentement était libre.</li>
+<li>Le bandeau cookies : vous reconnaissez la configuration de P18 si on vous la décrit précisément.</li></ul>
+<h2>Votre phrase fétiche</h2><p>« Tous nos concurrents font exactement pareil. »</p>
+<p class="pieces">Pièces que vous connaissez bien : P04, P05, P06, P18.</p>`},
+{id:"theo", group:"Bougeotte, cas A", title:"Théo Marchand, responsable support", tag:"Secret · cas A · facultatif", html:`
+<p class="lead">Responsable d'une équipe de 6 agents de support, depuis 8 mois. Vous ne connaissez rien au RGPD. Vous êtes honnête et un peu naïf.</p>
+<h2>Votre objectif</h2><p>Rendre service. Vous ne voyez pas où est le problème.</p>
+<h2>Ce que vous ne dites pas spontanément (parce qu'on ne vous le demande pas)</h2>
+<ul><li>Les 6 agents partagent un seul compte d'administration, sans double authentification. Le mot de passe circule dans les tickets (P12).</li>
+<li>Les agents exportent des fiches clients en CSV sur leur Google Drive personnel pour travailler de chez eux.</li>
+<li>La demande d'accès de Mme Fournier attend toujours : transmise au DPO en août, ticket non assigné (P15).</li></ul>
+<h2>Ce que vous admettez si on vous pose la bonne question</h2>
+<ul><li>Tout, très franchement, avec des détails. Si on vous demande comment vous travaillez au quotidien, vous racontez tout.</li></ul>
+<h2>Votre phrase fétiche</h2><p>« Ah bon, c'est interdit ? »</p>
+<p class="pieces">Pièces que vous connaissez bien : P12, P15.</p>`},
+
+/* ---------------- CAS B ---------------- */
+{id:"nora", group:"Bougeotte, cas B", title:"Nora Lefèvre, Head of Data et IA", tag:"Secret · cas B", html:`
+<p class="lead">Vous dirigez l'équipe data. Le projet « Blessure Zéro » est votre bébé, et l'argument phare de la levée de fonds.</p>
+<h2>Votre objectif</h2><p>Sauver le projet. Pour vous, c'est de l'amélioration du service, au bénéfice des utilisateurs.</p>
+<h2>Ce que vous ne dites pas spontanément</h2>
+<ul><li>L'extraction a eu lieu le 21 septembre : l'historique complet des 380 000 comptes, y compris les comptes supprimés et inactifs, avec les antécédents médicaux, la phase du cycle et l'indice de stress (P07).</li>
+<li>Chaque semaine, les conversations de l'assistant de la boutique sont ajoutées au jeu d'entraînement.</li>
+<li>Chez ModelCorp, le fournisseur américain du modèle de l'assistant, l'option « utiliser vos données pour améliorer nos modèles » est restée activée, par défaut.</li></ul>
+<h2>Ce que vous admettez si on vous pose la bonne question</h2>
+<ul><li>La base légale est l'« intérêt légitime », validé à l'oral par Hugo le 20 septembre. Vous ne connaissez pas l'article 9.</li>
+<li>Aucune analyse d'impact. Aucune information des utilisateurs : « c'est prévu dans la politique, au titre de l'amélioration du service ».</li></ul>
+<h2>Votre phrase fétiche</h2><p>« Les données sont pseudonymisées, donc ce ne sont plus vraiment des données personnelles. » (Vous le croyez sincèrement. C'est une erreur que les contrôleurs doivent relever.)</p>
+<p class="pieces">Pièces que vous connaissez bien : P07, P03, P16.</p>`},
+{id:"yanis", group:"Bougeotte, cas B", title:"Yanis Ferrand, lead développeur", tag:"Secret · cas B", html:`
+<p class="lead">Vous avez branché l'assistant de la boutique sur le modèle de ModelCorp, en deux semaines, sous pression.</p>
+<h2>Votre objectif</h2><p>Ne pas porter le chapeau. Vous aviez prévenu que ce n'était pas prêt.</p>
+<h2>Ce que vous ne dites pas spontanément</h2>
+<ul><li>L'assistant interroge la table des commandes avec un outil « search_orders » qui n'a aucun filtre par client. Le filtre est « dans le backlog ».</li>
+<li>Le client a signalé la fuite le 3 novembre par un ticket. Rien n'a été corrigé : le problème est toujours en ligne.</li>
+<li>Toutes les conversations sont gardées dans une table « chat_logs », sans durée de conservation.</li></ul>
+<h2>Ce que vous admettez si on vous pose la bonne question</h2>
+<ul><li>Si on vous demande à quelles données l'assistant a accès : « à la table des commandes ». Si on insiste : « toute la table ».</li>
+<li>Si les contrôleurs testent l'assistant devant vous et que la fuite se produit, vous reconnaissez le problème.</li>
+<li>Sur la suite du signalement : personne n'a parlé de notifier la CNIL.</li></ul>
+<h2>Votre phrase fétiche</h2><p>« J'avais mis un ticket. »</p>
+<p class="pieces">Pièces que vous connaissez bien : P12, P13, P16.</p>`},
+{id:"sarah", group:"Bougeotte, cas B", title:"Sarah Kemp, responsable e-commerce", tag:"Secret · cas B", html:`
+<p class="lead">Arrivée en 2025, vous gérez la boutique en ligne et son assistant. Inès Belkacem vous a confié la campagne d'emailing Black Friday.</p>
+<h2>Votre objectif</h2><p>Protéger les ventes de fin d'année.</p>
+<h2>Ce que vous ne dites pas spontanément</h2>
+<ul><li>C'est vous qui avez choisi de présenter l'assistant comme « Julie, votre conseillère », pour « humaniser ». Un test A/B montre +18 % de conversion avec un prénom humain.</li>
+<li>Le fichier DataSport Leads (P17) va resservir pour la campagne Black Friday, programmée le 27 novembre.</li>
+<li>Kinomail vous a transmis 12 plaintes. Trois demandaient d'où venait leur adresse. Vous n'avez pas répondu.</li></ul>
+<h2>Ce que vous admettez si on vous pose la bonne question</h2>
+<ul><li>Sur l'origine des adresses : « Le courtier nous a garanti qu'ils avaient accepté de recevoir des offres. » Aucun contrat, seulement une facture.</li>
+<li>Sur l'assistant : vous ne savez pas que la loi impose de dire que c'est une IA. Vous pensiez que c'était « une question de ton ».</li></ul>
+<h2>Votre phrase fétiche</h2><p>« Les clients adorent Julie. »</p>
+<p class="pieces">Pièces que vous connaissez bien : P04, P10, P17, P18.</p>`},
+{id:"avocat", group:"Bougeotte, cas B", title:"Me Aubert, avocat de Bougeotte", tag:"Secret · cas B · facultatif", html:`
+<p class="lead">Vous êtes l'avocat de Bougeotte, appelé en urgence ce matin. Vous ne connaissez pas le dossier technique.</p>
+<h2>Votre objectif</h2><p>Protéger votre client sans tomber dans l'entrave.</p>
+<h2>Ce que vous pouvez faire</h2>
+<ul><li>Demander que les questions soient précises, et que les réponses de vos clients soient fidèlement notées au PV.</li>
+<li>Demander une courte suspension pour parler à vos clients (2 minutes maximum).</li>
+<li>Faire préciser l'objet du contrôle : « Cette question entre-t-elle dans votre ordre de mission ? »</li></ul>
+<h2>Ce que vous ne pouvez pas faire</h2>
+<ul><li>Interdire à vos clients de répondre, ou refuser une pièce clairement demandée. Ce serait de l'entrave.</li></ul>
+<h2>Votre secret</h2><p>Vous avez conseillé ce matin de « ne remettre que le strict minimum ». Si un contrôleur vous demande si vous avez donné cette consigne, vous répondez prudemment.</p>
+<h2>Votre phrase fétiche</h2><p>« Je note que cette question sort de l'objet du contrôle. »</p>`},
+
+/* ---------------- COMMISSION ---------------- */
+/* ---------------- OBSERVATEURS ---------------- */
+{id:"obs-securite", group:"Observateurs", title:"Grille : sécurité", tag:"Observateur", grid:[
+ ["A","Compte d'administration partagé, sans double authentification (P12)"],["A","Mot de passe transmis en clair dans un ticket (P12)"],
+ ["A","Exports CSV sur des Google Drive personnels (P12)"],["A","Écart entre la PSSI et la réalité (P11 contre P12)"],
+ ["A","Stockage « exports-prod » exposé publiquement 9 jours (P13)"],["B","L'assistant donne accès à toute la table des commandes"],
+ ["B","Fuite signalée le 3 novembre et jamais corrigée"],["B","Test en direct de l'assistant par les contrôleurs"]]},
+{id:"obs-sante", group:"Observateurs", title:"Grille : santé et employeurs", tag:"Observateur", grid:[
+ ["A","Indice de stress nominatif envoyé aux employeurs (P06)"],["A","Alertes « burn-out » vendues aux employeurs (P06)"],
+ ["A","Consentement de salarié non libre"],["A","Antécédents médicaux obligatoires à l'inscription (P05)"],
+ ["B","Projet IA entraîné sur des données de santé (P07)"],["B","Aucune exception de l'article 9 identifiée"],
+ ["B","L'assistant demande des antécédents médicaux"],["B","« Pseudonymisé donc anonyme » : l'erreur repérée ?"]]},
+{id:"obs-transferts", group:"Observateurs", title:"Grille : prestataires et transferts", tag:"Observateur", grid:[
+ ["A","Loopmetric : conditions acceptées en ligne, pas d'accord de sous-traitance (P09)"],["A","Données de santé dans le plan de marquage de Loopmetric (P09)"],
+ ["A","Politique « jamais hors UE » contredite (P04 contre P09)"],["A","Contrats Nuage Hexagone et Kinomail reconnus conformes (P08, P10)"],
+ ["B","ModelCorp (États-Unis) : où vont les messages de l'assistant ?"],["B","Option « améliorer nos modèles » restée activée chez ModelCorp"],
+ ["B","Garanties du transfert vers ModelCorp demandées"]]},
+{id:"obs-droits", group:"Observateurs", title:"Grille : droits et conservation", tag:"Observateur", grid:[
+ ["A","Demande d'accès de Mme Fournier sans réponse depuis août (P15)"],["A","Aucune procédure de gestion des droits"],
+ ["A","112 412 comptes inactifs depuis plus de 3 ans (P16)"],["A","Suppression de compte purement logique (P16)"],
+ ["B","Comptes supprimés réutilisés pour entraîner l'IA (P07)"],["B","Conversations de l'assistant gardées sans limite"],
+ ["B","Plaintes « d'où vient mon adresse ? » restées sans réponse"]]},
+{id:"obs-marketing", group:"Observateurs", title:"Grille : prospection et interfaces", tag:"Observateur", grid:[
+ ["A","Case « offres partenaires » précochée (P05)"],["A","Bandeau cookies du site (P18) relié aux constats du matin"],
+ ["B","Fichier de 50 000 adresses acheté (P17)"],["B","Consentement donné à un autre que Bougeotte"],
+ ["B","Campagne Black Friday prévue le 27 novembre avec le même fichier"],["B","Assistant présenté comme « Julie, votre conseillère » (pas de mention IA)"]]},
+{id:"obs-gouvernance", group:"Observateurs", title:"Grille : gouvernance et documentation", tag:"Observateur", grid:[
+ ["A","DPO qui est aussi CTO, sans moyens (P02)"],["A","Registre de 2022, incomplet (P03)"],
+ ["A","Aucune analyse d'impact"],["A","Registre des violations vide (P14) malgré l'incident (P13)"],
+ ["B","L'assistant et Blessure Zéro absents du registre (P03)"],["B","Base légale validée « à l'oral » par le DPO"],
+ ["B","Signalement du 3 novembre non traité comme une violation"]]},
+
+/* ---------------- PV ---------------- */
+{id:"pv", group:"Contrôleurs", title:"Procès-verbal de contrôle sur place", tag:"Rédacteur", html:`
+<p class="fict">Document fictif, exercice pédagogique. Vos saisies restent dans ce navigateur. Copiez le PV à la fin et envoyez-le au formateur.</p>
+<div class="form" data-save="pv">
+<label for="pv_cas">Affaire</label><select id="pv_cas"><option>Cas A : la plainte de Léa</option><option>Cas B : l'assistant trop bavard</option></select>
+<label for="pv_heures">Date et heures (début, fin)</label><input id="pv_heures" placeholder="23/11/2026, 14 h 10 à 14 h 40">
+<label for="pv_ctrl">Contrôleurs (noms et rôles)</label><input id="pv_ctrl">
+<label for="pv_pers">Personnes entendues (nom, fonction)</label><textarea id="pv_pers" rows="3"></textarea>
+<label for="pv_pieces">Pièces remises (numéro, intitulé, heure)</label><textarea id="pv_pieces" rows="5"></textarea>
+<label for="pv_decl">Déclarations recueillies (qui a dit quoi, mot pour mot quand c'est important)</label><textarea id="pv_decl" rows="6"></textarea>
+<label for="pv_tests">Tests réalisés en direct (site, assistant) et résultats</label><textarea id="pv_tests" rows="4"></textarea>
+<label for="pv_const">Constats (un fait, sa preuve)</label><textarea id="pv_const" rows="7" placeholder="1. Fait : ... Preuve : pièce P.. / déclaration de ..."></textarea>
+<label for="pv_refus">Pièces demandées et non remises</label><textarea id="pv_refus" rows="3"></textarea>
+</div>`}
+];
+
+const GROUP_ORDER = ["Pour tous","Contrôleurs","Bougeotte, cas A","Bougeotte, cas B","Observateurs"];
+
+const view = document.getElementById("view");
+const byId = Object.fromEntries(ROLES.map(r => [r.id, r]));
+const esc = s => String(s == null ? "" : s).replace(/[<>&"]/g, c => ({"<":"&lt;", ">":"&gt;", "&":"&amp;", '"':"&quot;"}[c]));
+function store(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem("bgtf_" + k) || "{}"); localStorage.setItem("bgtf_" + k, JSON.stringify(v)); } catch(e){ return {}; } }
+const base = location.origin + location.pathname;
+
+function gridHtml(r){
+  return `<p class="lead">Pendant chaque manche, cochez ce que les contrôleurs trouvent. « Effleuré » : ils s'en sont approchés sans aller jusqu'à la preuve. Notez comment ils s'y sont pris, ou ce qui leur a manqué.</p>
+    <div class="form" data-save="${r.id}">${r.grid.map((g, i) => `
+      <div class="gitem"><div class="q"><span class="cas">Cas ${g[0]}</span><span>${g[1]}</span></div>
+        <div class="choices" role="radiogroup" aria-label="${esc(g[1])}">
+          ${["Trouvé","Effleuré","Raté"].map(c => `<label><input type="radio" name="g${i}" value="${c}"> ${c}</label>`).join("")}</div>
+        <label for="n${i}" class="sr" style="position:absolute;left:-9999px">Note</label><input class="gnote" id="n${i}" placeholder="Comment, ou ce qui a manqué"></div>`).join("")}
+      <label for="g_best">La meilleure question entendue</label><textarea id="g_best" rows="2"></textarea>
+    </div>`;
+}
+function textOf(r){
+  const box = view.querySelector("[data-save]"); if (!box) return "";
+  let out = r.title + "\n" + "=".repeat(r.title.length) + "\n";
+  if (r.grid) box.querySelectorAll(".gitem").forEach((g, i) => {
+    const sel = g.querySelector("input[type=radio]:checked");
+    out += "- [Cas " + r.grid[i][0] + "] " + r.grid[i][1] + " : " + (sel ? sel.value : "non noté") + (g.querySelector(".gnote").value ? " (" + g.querySelector(".gnote").value + ")" : "") + "\n";
+  });
+  box.querySelectorAll(":scope > label").forEach(l => {
+    const el = document.getElementById(l.htmlFor); if (!el || el.closest(".gitem")) return;
+    out += "\n" + l.textContent + " :\n" + (el.value || "-") + "\n";
+  });
+  if (!r.grid){
+    box.querySelectorAll(".gitem label[for], .choices label[for]").forEach(l => {
+      const el = document.getElementById(l.htmlFor); if (!el) return;
+      out += "\n" + l.textContent + " : " + (el.tagName === "SELECT" ? el.options[el.selectedIndex].text : (el.value || "-"));
+    });
+    box.querySelectorAll("input[type=checkbox]").forEach(c => { if (c.checked) out += "\n[x] " + c.parentElement.textContent.trim(); });
+    const co = document.getElementById("calcOut"); if (co) out += "\n\n" + co.textContent + "\n";
+  }
+  return out;
+}
+function wireForm(r){
+  const box = view.querySelector("[data-save]"); if (!box) return;
+  const key = box.dataset.save, saved = store(key);
+  box.querySelectorAll("input,select,textarea").forEach(el => {
+    const k = el.type === "radio" ? el.name : el.id;
+    if (saved[k] !== undefined){ if (el.type === "radio") el.checked = saved[k] === el.value; else if (el.type === "checkbox") el.checked = !!saved[k]; else el.value = saved[k]; }
+    el.addEventListener("input", save); el.addEventListener("change", save);
+  });
+  function save(){
+    const o = {};
+    box.querySelectorAll("input,select,textarea").forEach(el => { if (el.type === "radio"){ if (el.checked) o[el.name] = el.value; } else if (el.type === "checkbox") o[el.id] = el.checked; else o[el.id] = el.value; });
+    store(key, o);
+  }
+  view.insertAdjacentHTML("beforeend", `<div class="row-btns"><button class="btn" id="copy">Copier pour l'envoyer au formateur</button><button class="btn ghost" id="clear">Effacer</button><span class="msg" id="m"></span></div>`);
+  document.getElementById("copy").onclick = async () => { try { await navigator.clipboard.writeText(textOf(r)); document.getElementById("m").textContent = "Copié. Collez-le dans le fil de la classe."; } catch(e){ document.getElementById("m").textContent = "Copie refusée : sélectionnez le texte à la main."; } };
+  document.getElementById("clear").onclick = (e) => { const b = e.target; if (!b.dataset.ok){ b.dataset.ok = 1; b.textContent = "Cliquer encore pour tout effacer"; return; } store(key, {}); render(); };
+}
+function setupCalc(){
+  const out = document.getElementById("calcOut"); if (!out) return;
+  const run = () => {
+    let score = 0;
+    [1,2,3].forEach(i => { score += (+document.getElementById("m"+i+"_g").value) * (+document.getElementById("m"+i+"_p").value); });
+    ["a1","a2","a3","a4","a5","a6"].forEach(id => { const c = document.getElementById(id); if (c.checked) score += +c.value; });
+    let s;
+    if (score <= 9) s = "Mise en demeure, sans amende.";
+    else if (score <= 14) s = "Amende de 50 000 à 150 000 €.";
+    else if (score <= 20) s = "Amende de 150 000 à 400 000 €, décision publique.";
+    else s = "Amende de 400 000 à 800 000 €, décision publique, injonction sous astreinte.";
+    out.innerHTML = "<b>Score : " + score + " points.</b> Fourchette indicative : " + s;
+  };
+  document.querySelectorAll(".calc").forEach(el => el.addEventListener("change", run));
+  run();
+}
+function renderRole(r){
+  view.innerHTML = `<div class="grp">${esc(r.group)}</div>
+    <div class="head"><h1>${esc(r.title)}</h1><span class="badge">${esc(r.tag)}</span></div>
+    ${r.grid ? gridHtml(r) : r.html}`;
+  wireForm(r);
+  if (r.id === "commission") setupCalc();
+}
+function renderPlan(){
+  const groups = [...new Set(ROLES.map(r => r.group))];
+  view.innerHTML = `<div class="grp">Formateur</div><div class="head"><h1>Plan de distribution des liens</h1><span class="badge">Ne pas projeter</span></div>
+    <p>Donnez à chacun uniquement son lien. Les fiches Bougeotte sont secrètes : ni les contrôleurs ni l'autre cas ne doivent les voir.</p>
+    <h2>Distribution pour 20 personnes</h2>
+    <p>16 joueurs (8 par manche) et 4 observateurs permanents.</p>
+    <table><tr><th>Groupe</th><th>Nb</th><th>Liens</th></tr>
+      <tr><td>Contrôleurs cas A</td><td>4</td><td>mission-a, puis chef, juriste, auditeur, redacteur (un par personne), pv pour le rédacteur</td></tr>
+      <tr><td>Bougeotte cas A</td><td>4</td><td>camille, hugo, ines, theo + la data room</td></tr>
+      <tr><td>Contrôleurs cas B</td><td>4</td><td>mission-b, puis chef, juriste, auditeur, redacteur, pv</td></tr>
+      <tr><td>Bougeotte cas B</td><td>4</td><td>nora, yanis, sarah, avocat + la data room</td></tr>
+      <tr><td>Observateurs</td><td>12 par manche</td><td>Les 4 qui restent observent les deux manches. Pendant la manche 1, les 8 du cas B observent aussi, et inversement. Deux observateurs par thème.</td></tr></table>
+    ${groups.map(g => `<h2>${esc(g)}</h2><table class="links">${ROLES.filter(r => r.group === g).map(r => `<tr><td><a href="#${r.id}">${esc(r.title)}</a></td><td><code>${esc(base + "#" + r.id)}</code></td></tr>`).join("")}</table>`).join("")}`;
+}
+function renderHome(){
+  view.innerHTML = `<div class="home"><div class="sec">Simulation de contrôle</div><h1 style="margin:.3em 0">Ouvrez le lien de votre rôle</h1>
+    <p>Votre formateur vous donne un lien personnel. Il mène directement à votre fiche.</p></div>`;
+}
+function render(){
+  const h = (location.hash || "").slice(1);
+  if (byId[h]) renderRole(byId[h]);
+  else if (h === "plan-formateur") renderPlan();
+  else renderHome();
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", render);
+render();
+</script>
+</body>
+</html>
